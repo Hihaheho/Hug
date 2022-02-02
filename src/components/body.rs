@@ -2,9 +2,12 @@ use std::{
     any::{Any, TypeId},
     collections::HashMap,
     marker::PhantomData,
+    ops::{Deref, DerefMut},
 };
 
 use bevy::prelude::*;
+
+use super::player::Player;
 
 #[derive(Component)]
 pub struct Hip;
@@ -52,7 +55,23 @@ pub const UPPER_ARM_LENGTH: f32 = 2.5 / 15. * HEIGHT;
 pub const PELVIS_LENGTH: f32 = 1.5 / 15. * HEIGHT;
 
 #[derive(Component)]
-pub struct PlayerBody<T>(pub Body, PhantomData<T>);
+pub struct PlayerBody<T> {
+    pub body: Body,
+    pub propagated: Body,
+    data: PhantomData<T>,
+}
+
+impl<T: Player> PlayerBody<T> {
+    pub fn new(body: Body, propagated: Body) -> Self {
+        PlayerBody {
+            body,
+            propagated,
+            data: Default::default(),
+        }
+    }
+}
+
+#[derive(Clone)]
 pub struct Body(HashMap<TypeId, Transform>);
 
 impl Default for Body {

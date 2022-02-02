@@ -2,6 +2,7 @@ mod components;
 
 use bevy::prelude::{shape as bevy_shape, *};
 use bevy_rapier3d::{
+    na::{Normed, Vector3},
     physics::{JointHandleComponent, PhysicsSystems},
     prelude::*,
 };
@@ -32,10 +33,26 @@ fn main() {
         .add_system_set(
             SystemSet::new()
                 .before(PhysicsSystems::StepWorld)
+                .with_system(head_baloon_system::<Player1>)
+                .with_system(hand_baloon_system::<Player1>)
+                .with_system(head_baloon_system::<Player2>)
+                // .with_system(hand_baloon_system::<Player2>)
                 .with_system(angular_spring_system::<Player1, Hip, Spine>)
                 .with_system(angular_spring_system::<Player1, Spine, Chest>)
                 .with_system(angular_spring_system::<Player1, Chest, Neck>)
-                .with_system(angular_spring_system::<Player1, Neck, Head>),
+                .with_system(angular_spring_system::<Player1, Neck, Head>)
+                .with_system(angular_spring_system::<Player1, Chest, UpperArmLeft>)
+                .with_system(angular_spring_system::<Player1, UpperArmLeft, ForearmLeft>)
+                .with_system(angular_spring_system::<Player1, ForearmLeft, HandLeft>)
+                .with_system(angular_spring_system::<Player1, Chest, UpperArmRight>)
+                .with_system(angular_spring_system::<Player1, UpperArmRight, ForearmRight>)
+                .with_system(angular_spring_system::<Player1, ForearmRight, HandRight>)
+                .with_system(angular_spring_system::<Player1, Hip, ThighLeft>)
+                .with_system(angular_spring_system::<Player1, ThighLeft, ShinLeft>)
+                .with_system(angular_spring_system::<Player1, ShinLeft, FootLeft>)
+                .with_system(angular_spring_system::<Player1, Hip, ThighRight>)
+                .with_system(angular_spring_system::<Player1, ThighRight, ShinRight>)
+                .with_system(angular_spring_system::<Player1, ShinRight, FootRight>),
         )
         .add_system_set(SystemSet::new().after(PhysicsSystems::StepWorld));
 
@@ -89,8 +106,10 @@ fn setup(
 fn create_player<T: Player + Copy>(commands: &mut Commands, tag: T, z: f32) {
     let mut body = Body::default();
     body.get_mut::<Hip>().translation.z = z;
-    body.get_mut::<Hip>().translation.y += 0.5;
+    body.get_mut::<Hip>().translation.y += 0.1;
     let propagated = body.propagated();
+
+    commands.insert_resource(PlayerBody::<T>::new(body.clone(), propagated.clone()));
 
     let hip = commands
         .spawn()
@@ -98,7 +117,6 @@ fn create_player<T: Player + Copy>(commands: &mut Commands, tag: T, z: f32) {
         .insert(Hip)
         .insert(propagated.get::<Hip>().clone())
         .insert_bundle(RigidBodyBundle {
-            body_type: RigidBodyType::Static.into(),
             ..rigid_body_bundle(propagated.get::<Hip>())
         })
         .insert_bundle(collider_bundle::<T>(ColliderShape::ball(0.1)))
@@ -282,51 +300,44 @@ fn create_player<T: Player + Copy>(commands: &mut Commands, tag: T, z: f32) {
         .insert(RigidBodyPositionSync::Discrete)
         .id();
 
-    insert_joint::<Hip, Spine>(commands, &body, hip, spine);
-    insert_joint::<Spine, Chest>(commands, &body, spine, chest);
-    insert_joint::<Chest, Neck>(commands, &body, chest, neck);
-    insert_joint::<Neck, Head>(commands, &body, neck, head);
-    insert_joint::<Hip, ThighLeft>(commands, &body, hip, thigh_left);
-    insert_joint::<ThighLeft, ShinLeft>(commands, &body, thigh_left, shin_left);
-    insert_joint::<ShinLeft, FootLeft>(commands, &body, shin_left, foot_left);
-    insert_joint::<Hip, ThighRight>(commands, &body, hip, thigh_right);
-    insert_joint::<ThighRight, ShinRight>(commands, &body, thigh_right, shin_right);
-    insert_joint::<ShinRight, FootRight>(commands, &body, shin_right, foot_right);
-    insert_joint::<Chest, UpperArmLeft>(commands, &body, chest, upper_arm_left);
-    insert_joint::<UpperArmLeft, ForearmLeft>(commands, &body, upper_arm_left, forearm_left);
-    insert_joint::<ForearmLeft, HandLeft>(commands, &body, forearm_left, hand_left);
-    insert_joint::<Chest, UpperArmRight>(commands, &body, chest, upper_arm_right);
-    insert_joint::<UpperArmRight, ForearmRight>(commands, &body, upper_arm_right, forearm_right);
-    insert_joint::<ForearmRight, HandRight>(commands, &body, forearm_right, hand_right);
+    joint::<Hip, Spine, _>(commands, tag, &body, hip, spine);
+    joint::<Spine, Chest, _>(commands, tag, &body, spine, chest);
+    joint::<Chest, Neck, _>(commands, tag, &body, chest, neck);
+    joint::<Neck, Head, _>(commands, tag, &body, neck, head);
+    joint::<Hip, ThighLeft, _>(commands, tag, &body, hip, thigh_left);
+    joint::<ThighLeft, ShinLeft, _>(commands, tag, &body, thigh_left, shin_left);
+    joint::<ShinLeft, FootLeft, _>(commands, tag, &body, shin_left, foot_left);
+    joint::<Hip, ThighRight, _>(commands, tag, &body, hip, thigh_right);
+    joint::<ThighRight, ShinRight, _>(commands, tag, &body, thigh_right, shin_right);
+    joint::<ShinRight, FootRight, _>(commands, tag, &body, shin_right, foot_right);
+    joint::<Chest, UpperArmLeft, _>(commands, tag, &body, chest, upper_arm_left);
+    joint::<UpperArmLeft, ForearmLeft, _>(commands, tag, &body, upper_arm_left, forearm_left);
+    joint::<ForearmLeft, HandLeft, _>(commands, tag, &body, forearm_left, hand_left);
+    joint::<Chest, UpperArmRight, _>(commands, tag, &body, chest, upper_arm_right);
+    joint::<UpperArmRight, ForearmRight, _>(commands, tag, &body, upper_arm_right, forearm_right);
+    joint::<ForearmRight, HandRight, _>(commands, tag, &body, forearm_right, hand_right);
 
-    let hip_translation = propagated.get::<Hip>().translation;
+    // Lock hip's rotation by connecting to the ground (locking with mass properties causes panic).
     let ground = commands
         .spawn_bundle(RigidBodyBundle {
-            position: Vec3::new(hip_translation.x, 0.0, hip_translation.z).into(),
+            position: Vec3::new(0.0, -0.5, 0.0).into(),
             body_type: RigidBodyType::Static.into(),
             ..Default::default()
         })
         .insert_bundle(ColliderBundle {
-            shape: ColliderShape::ball(0.1).into(),
+            shape: ColliderShape::cuboid(0.1, 0.1, 0.1).into(),
             ..Default::default()
         })
         .id();
-
-    // let joint = SphericalJoint::new()
-    //     .local_anchor2(Vec3::new(0.0, -hip_translation.y, 0.0).into())
-    //     .motor_position(JointAxis::AngX, 0.0, 10., 0.0)
-    //     .motor_position(JointAxis::AngY, 0.0, 10., 0.0)
-    //     .motor_position(JointAxis::AngZ, 0.0, 10., 0.0)
-    //     .motor_model(JointAxis::AngX, MotorModel::AccelerationBased)
-    //     .motor_model(JointAxis::AngY, MotorModel::AccelerationBased)
-    //     .motor_model(JointAxis::AngZ, MotorModel::AccelerationBased);
-    // let joint = JointBuilderComponent::new(joint, ground, hip);
-
-    // commands.spawn().insert(joint);
+    let joint = JointData::new(JointAxesMask::ANG_X | JointAxesMask::ANG_Y | JointAxesMask::ANG_Z);
+    commands
+        .spawn()
+        .insert(JointBuilderComponent::new(joint, ground, hip));
 }
 
-fn insert_joint<Parent: Component, Child: Component>(
+fn joint<Parent: Component, Child: Component, T: Player>(
     commands: &mut Commands,
+    tag: T,
     body: &Body,
     parent: Entity,
     child: Entity,
@@ -334,39 +345,37 @@ fn insert_joint<Parent: Component, Child: Component>(
     let child_translation = body.get::<Child>().translation;
     let joint = SphericalJoint::new()
         .local_anchor2((-child_translation).into())
-        .motor_position(JointAxis::AngX, 0.0, 10., 0.0)
-        .motor_position(JointAxis::AngY, 0.0, 10., 0.0)
-        .motor_position(JointAxis::AngZ, 0.0, 10., 0.0)
-        .motor_model(JointAxis::AngX, MotorModel::AccelerationBased)
-        .motor_model(JointAxis::AngY, MotorModel::AccelerationBased)
-        .motor_model(JointAxis::AngZ, MotorModel::AccelerationBased);
+        .motor_position(JointAxis::AngX, 0.0, 1.5, 1.5)
+        .motor_position(JointAxis::AngY, 0.0, 1.5, 1.5)
+        .motor_position(JointAxis::AngZ, 0.0, 1.5, 1.5)
+        .motor_model(JointAxis::AngX, MotorModel::VelocityBased)
+        .motor_model(JointAxis::AngY, MotorModel::VelocityBased)
+        .motor_model(JointAxis::AngZ, MotorModel::VelocityBased);
     let joint = JointBuilderComponent::new(joint, parent, child);
     commands
         .spawn()
-        .insert(Joint::<Parent, Child>::default())
-        .insert(joint);
-}
-
-fn insert_fixed_joint<Parent: Component, Child: Component>(
-    commands: &mut Commands,
-    body: &Body,
-    parent: Entity,
-    child: Entity,
-) {
-    let joint = JointBuilderComponent::new(
-        FixedJoint::new().local_anchor2((-body.get::<Child>().translation).into()),
-        parent,
-        child,
-    );
-    commands
-        .spawn()
+        .insert(tag)
         .insert(Joint::<Parent, Child>::default())
         .insert(joint);
 }
 
 fn head_baloon_system<T: Player>(
-    mut head: Query<&RigidBodyForcesComponent, (With<T>, With<Head>)>,
+    mut head: Query<(&mut RigidBodyForcesComponent, &Transform), (With<T>, With<Head>)>,
 ) {
+    for (mut forces, _transform) in head.iter_mut() {
+        forces.force += vector!(0.0, 0.45, 0.0);
+    }
+}
+
+fn hand_baloon_system<T: Player>(
+    mut head: Query<
+        (&mut RigidBodyForcesComponent, &Transform),
+        (With<T>, Or<(With<HandLeft>, With<HandRight>)>),
+    >,
+) {
+    for (mut forces, _transform) in head.iter_mut() {
+        forces.force += vector!(0.0, 0.06, 0.0);
+    }
 }
 
 fn angular_spring_system<T: Player, Parent: Component, Child: Component>(
