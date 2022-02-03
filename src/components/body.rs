@@ -9,63 +9,88 @@ use bevy::prelude::*;
 
 use super::player::Player;
 
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct Hip;
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct Spine;
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct Chest;
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct Neck;
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct Head;
-#[derive(Component)]
-pub struct HeadEnd;
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct UpperArmLeft;
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct ForearmLeft;
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct HandLeft;
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct UpperArmRight;
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct ForearmRight;
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct HandRight;
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct ThighLeft;
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct ShinLeft;
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct FootLeft;
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct ThighRight;
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct ShinRight;
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct FootRight;
 
-pub const HEIGHT: f32 = 1.7;
-pub const SHIN_LENGTH: f32 = 3.5 / 15. * HEIGHT;
-pub const THIGH_LENGTH: f32 = 3.5 / 15. * HEIGHT;
-pub const SHOULDER_LENGTH: f32 = 2.0 / 15. * HEIGHT;
-pub const FOREARM_LENGTH: f32 = 2.5 / 15. * HEIGHT;
-pub const UPPER_ARM_LENGTH: f32 = 2.5 / 15. * HEIGHT;
-pub const PELVIS_LENGTH: f32 = 1.5 / 15. * HEIGHT;
+pub trait BodyPart: Component + Default {}
+impl BodyPart for Hip {}
+impl BodyPart for Spine {}
+impl BodyPart for Chest {}
+impl BodyPart for Neck {}
+impl BodyPart for Head {}
+impl BodyPart for UpperArmLeft {}
+impl BodyPart for ForearmLeft {}
+impl BodyPart for HandLeft {}
+impl BodyPart for UpperArmRight {}
+impl BodyPart for ForearmRight {}
+impl BodyPart for HandRight {}
+impl BodyPart for ThighLeft {}
+impl BodyPart for ShinLeft {}
+impl BodyPart for FootLeft {}
+impl BodyPart for ThighRight {}
+impl BodyPart for ShinRight {}
+impl BodyPart for FootRight {}
 
-#[derive(Component)]
+pub const HEIGHT: f32 = 1.7;
+pub const RATIO: f32 = HEIGHT / 15.0;
+pub const TORSO_WIDTH: f32 = 3.8 * RATIO;
+pub const TORSO_THICKNESS: f32 = 1.8 * RATIO;
+// pub const TORSO_ROUNDNESS: f32 = 0.1;
+pub const NECK_RADIUS: f32 = 0.8 * RATIO;
+pub const HEAD_RADIUS: f32 = 1.6 * RATIO;
+pub const ARM_RADIUS: f32 = 0.6 * RATIO;
+pub const LEG_RADIUS: f32 = 0.8 * RATIO;
+pub const SHIN_LENGTH: f32 = 3.5 * RATIO;
+pub const THIGH_LENGTH: f32 = 3.5 * RATIO;
+pub const SHOULDER_LENGTH: f32 = 2.0 * RATIO;
+pub const FOREARM_LENGTH: f32 = 2.5 * RATIO;
+pub const UPPER_ARM_LENGTH: f32 = 2.5 * RATIO;
+pub const PELVIS_LENGTH: f32 = 1.5 * RATIO;
+
+#[derive(Component, Default)]
 pub struct PlayerBody<T> {
-    pub body: Body,
-    pub propagated: Body,
+    pub relative: Body,
+    pub absolute: Body,
     data: PhantomData<T>,
 }
 
 impl<T: Player> PlayerBody<T> {
     pub fn new(body: Body, propagated: Body) -> Self {
         PlayerBody {
-            body,
-            propagated,
+            relative: body,
+            absolute: propagated,
             data: Default::default(),
         }
     }
@@ -77,26 +102,16 @@ pub struct Body(HashMap<TypeId, Transform>);
 impl Default for Body {
     fn default() -> Self {
         let mut body = Self(HashMap::new());
-        body.0.insert(
-            Hip.type_id(),
-            Transform::from_xyz(0.0, 7. / 15. * HEIGHT, 0.0),
-        );
-        body.0.insert(
-            Spine.type_id(),
-            Transform::from_xyz(0.0, 2. / 15. * HEIGHT, 0.0),
-        );
-        body.0.insert(
-            Chest.type_id(),
-            Transform::from_xyz(0.0, 2. / 15. * HEIGHT, 0.0),
-        );
-        body.0.insert(
-            Neck.type_id(),
-            Transform::from_xyz(0.0, 1. / 15. * HEIGHT, 0.0),
-        );
-        body.0.insert(
-            Head.type_id(),
-            Transform::from_xyz(0.0, 3. / 15. * HEIGHT, 0.0),
-        );
+        body.0
+            .insert(Hip.type_id(), Transform::from_xyz(0.0, 7. * RATIO, 0.0));
+        body.0
+            .insert(Spine.type_id(), Transform::from_xyz(0.0, 2. * RATIO, 0.0));
+        body.0
+            .insert(Chest.type_id(), Transform::from_xyz(0.0, 2. * RATIO, 0.0));
+        body.0
+            .insert(Neck.type_id(), Transform::from_xyz(0.0, 1. * RATIO, 0.0));
+        body.0
+            .insert(Head.type_id(), Transform::from_xyz(0.0, 3. * RATIO, 0.0));
         body.0.insert(
             UpperArmLeft.type_id(),
             Transform::from_xyz(-SHOULDER_LENGTH, 0.0, 0.0),

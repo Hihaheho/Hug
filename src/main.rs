@@ -8,19 +8,12 @@ use bevy_rapier3d::{
 };
 use components::{
     body::*,
-    physics::{CollisionTag, Joint},
+    physics::{CollisionTag, Joint, JointMotorParams},
     player::{Player, Player1, Player2},
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, SystemLabel)]
-pub enum MainSystems {
-    /// After global transform update, sync the global transform to rigid bodies
-    SyncRigidBody,
-    /// After physics update, sync the transform from rigid bodies
-    SyncTransform,
-    /// Move the body by changing transform
-    BodyMovement,
-}
+pub enum HugSystems {}
 
 #[bevy_main]
 fn main() {
@@ -36,21 +29,13 @@ fn main() {
                 .with_system(head_baloon_system::<Player1>)
                 .with_system(hand_baloon_system::<Player1>)
                 .with_system(head_baloon_system::<Player2>)
-                // .with_system(hand_baloon_system::<Player2>)
-                .with_system(angular_spring_system::<Player1, Hip, Spine>)
-                .with_system(angular_spring_system::<Player1, Spine, Chest>)
-                .with_system(angular_spring_system::<Player1, Chest, Neck>)
-                .with_system(angular_spring_system::<Player1, Neck, Head>)
-                .with_system(angular_spring_system::<Player1, Chest, UpperArmLeft>)
+                .with_system(hand_baloon_system::<Player2>)
                 .with_system(angular_spring_system::<Player1, UpperArmLeft, ForearmLeft>)
                 .with_system(angular_spring_system::<Player1, ForearmLeft, HandLeft>)
-                .with_system(angular_spring_system::<Player1, Chest, UpperArmRight>)
                 .with_system(angular_spring_system::<Player1, UpperArmRight, ForearmRight>)
                 .with_system(angular_spring_system::<Player1, ForearmRight, HandRight>)
-                .with_system(angular_spring_system::<Player1, Hip, ThighLeft>)
                 .with_system(angular_spring_system::<Player1, ThighLeft, ShinLeft>)
                 .with_system(angular_spring_system::<Player1, ShinLeft, FootLeft>)
-                .with_system(angular_spring_system::<Player1, Hip, ThighRight>)
                 .with_system(angular_spring_system::<Player1, ThighRight, ShinRight>)
                 .with_system(angular_spring_system::<Player1, ShinRight, FootRight>),
         )
@@ -70,10 +55,11 @@ fn setup(
     commands
         .spawn_bundle(PbrBundle {
             mesh: meshes.add(Mesh::from(bevy_shape::Plane { size: 5.0 })),
-            material: materials.add(Color::rgb(0.1, 0.1, 0.1).into()),
+            material: materials.add(Color::rgb(0.1, 0.2, 0.3).into()),
             ..Default::default()
         })
         .insert_bundle(RigidBodyBundle {
+            position: Vec3::new(0.0, -0.1, 0.0).into(),
             body_type: RigidBodyType::Static.into(),
             ..Default::default()
         })
@@ -99,223 +85,52 @@ fn setup(
         ..Default::default()
     });
 
-    create_player(&mut commands, Player1, 1.0);
-    create_player(&mut commands, Player2, -1.0);
+    create_player::<Player1>(&mut commands, 1.0);
+    create_player::<Player2>(&mut commands, -1.0);
 }
 
-fn create_player<T: Player + Copy>(commands: &mut Commands, tag: T, z: f32) {
+fn create_player<T: Player + Copy>(commands: &mut Commands, z: f32) {
     let mut body = Body::default();
     body.get_mut::<Hip>().translation.z = z;
     body.get_mut::<Hip>().translation.y += 0.1;
     let propagated = body.propagated();
 
-    commands.insert_resource(PlayerBody::<T>::new(body.clone(), propagated.clone()));
+    let body = PlayerBody::<T>::new(body.clone(), propagated.clone());
 
-    let hip = commands
-        .spawn()
-        .insert(tag)
-        .insert(Hip)
-        .insert(propagated.get::<Hip>().clone())
-        .insert_bundle(RigidBodyBundle {
-            ..rigid_body_bundle(propagated.get::<Hip>())
-        })
-        .insert_bundle(collider_bundle::<T>(ColliderShape::ball(0.1)))
-        .insert(ColliderDebugRender::with_id(1))
-        .insert(RigidBodyPositionSync::Discrete)
-        .id();
+    let hip = spawn_body_part::<T, Hip>(commands, &body, small_collider::<T>);
+    let spine = spawn_body_part::<T, Spine>(commands, &body, torso_collider::<T>);
+    let chest = spawn_body_part::<T, Chest>(commands, &body, torso_collider::<T>);
+    let neck = spawn_body_part::<T, Neck>(commands, &body, neck_collider::<T>);
+    let head = spawn_body_part::<T, Head>(commands, &body, head_collider::<T>);
+    let upper_arm_left = spawn_body_part::<T, UpperArmLeft>(commands, &body, small_collider::<T>);
+    let forearm_left = spawn_body_part::<T, ForearmLeft>(commands, &body, arm_collider::<T>);
+    let hand_left = spawn_body_part::<T, HandLeft>(commands, &body, arm_collider::<T>);
+    let upper_arm_right = spawn_body_part::<T, UpperArmRight>(commands, &body, small_collider::<T>);
+    let forearm_right = spawn_body_part::<T, ForearmRight>(commands, &body, arm_collider::<T>);
+    let hand_right = spawn_body_part::<T, HandRight>(commands, &body, arm_collider::<T>);
+    let thigh_left = spawn_body_part::<T, ThighLeft>(commands, &body, small_collider::<T>);
+    let shin_left = spawn_body_part::<T, ShinLeft>(commands, &body, leg_collider::<T>);
+    let foot_left = spawn_body_part::<T, FootLeft>(commands, &body, leg_collider::<T>);
+    let thigh_right = spawn_body_part::<T, ThighRight>(commands, &body, small_collider::<T>);
+    let shin_right = spawn_body_part::<T, ShinRight>(commands, &body, leg_collider::<T>);
+    let foot_right = spawn_body_part::<T, FootRight>(commands, &body, leg_collider::<T>);
 
-    let spine = commands
-        .spawn()
-        .insert(tag)
-        .insert(Spine)
-        .insert(propagated.get::<Spine>().clone())
-        .insert_bundle(rigid_body_bundle(propagated.get::<Spine>()))
-        .insert_bundle(collider_bundle::<T>(ColliderShape::ball(0.1)))
-        .insert(ColliderDebugRender::with_id(1))
-        .insert(RigidBodyPositionSync::Discrete)
-        .id();
-
-    let chest = commands
-        .spawn()
-        .insert(tag)
-        .insert(Chest)
-        .insert(propagated.get::<Chest>().clone())
-        .insert_bundle(rigid_body_bundle(propagated.get::<Chest>()))
-        .insert_bundle(collider_bundle::<T>(ColliderShape::ball(0.1)))
-        .insert(ColliderDebugRender::with_id(1))
-        .insert(RigidBodyPositionSync::Discrete)
-        .id();
-
-    let neck = commands
-        .spawn()
-        .insert(tag)
-        .insert(Neck)
-        .insert(propagated.get::<Neck>().clone())
-        .insert_bundle(rigid_body_bundle(propagated.get::<Neck>()))
-        .insert_bundle(collider_bundle::<T>(ColliderShape::ball(0.1)))
-        .insert(ColliderDebugRender::with_id(1))
-        .insert(RigidBodyPositionSync::Discrete)
-        .id();
-
-    let head = commands
-        .spawn()
-        .insert(tag)
-        .insert(Head)
-        .insert(propagated.get::<Head>().clone())
-        .insert_bundle(rigid_body_bundle(propagated.get::<Head>()))
-        .insert_bundle(collider_bundle::<T>(ColliderShape::ball(0.1)))
-        .insert(ColliderDebugRender::with_id(1))
-        .insert(RigidBodyPositionSync::Discrete)
-        .id();
-
-    let thigh_left = commands
-        .spawn()
-        .insert(tag)
-        .insert(ThighLeft)
-        .insert(propagated.get::<ThighLeft>().clone())
-        .insert_bundle(rigid_body_bundle(propagated.get::<ThighLeft>()))
-        .insert_bundle(collider_bundle::<T>(ColliderShape::ball(0.1)))
-        .insert(ColliderDebugRender::with_id(1))
-        .insert(RigidBodyPositionSync::Discrete)
-        .id();
-
-    let shin_left = commands
-        .spawn()
-        .insert(tag)
-        .insert(ShinLeft)
-        .insert(propagated.get::<ShinLeft>().clone())
-        .insert_bundle(rigid_body_bundle(propagated.get::<ShinLeft>()))
-        .insert_bundle(collider_bundle::<T>(ColliderShape::ball(0.1)))
-        .insert(ColliderDebugRender::with_id(1))
-        .insert(RigidBodyPositionSync::Discrete)
-        .id();
-
-    let foot_left = commands
-        .spawn()
-        .insert(tag)
-        .insert(FootLeft)
-        .insert(propagated.get::<FootLeft>().clone())
-        .insert_bundle(rigid_body_bundle(propagated.get::<FootLeft>()))
-        .insert_bundle(collider_bundle::<T>(ColliderShape::ball(0.1)))
-        .insert(ColliderDebugRender::with_id(1))
-        .insert(RigidBodyPositionSync::Discrete)
-        .id();
-
-    let thigh_right = commands
-        .spawn()
-        .insert(tag)
-        .insert(ThighRight)
-        .insert(propagated.get::<ThighRight>().clone())
-        .insert_bundle(rigid_body_bundle(propagated.get::<ThighRight>()))
-        .insert_bundle(collider_bundle::<T>(ColliderShape::ball(0.1)))
-        .insert(ColliderDebugRender::with_id(1))
-        .insert(RigidBodyPositionSync::Discrete)
-        .id();
-
-    let shin_right = commands
-        .spawn()
-        .insert(tag)
-        .insert(ShinRight)
-        .insert(propagated.get::<ShinRight>().clone())
-        .insert_bundle(rigid_body_bundle(propagated.get::<ShinRight>()))
-        .insert_bundle(collider_bundle::<T>(ColliderShape::ball(0.1)))
-        .insert(ColliderDebugRender::with_id(1))
-        .insert(RigidBodyPositionSync::Discrete)
-        .id();
-
-    let foot_right = commands
-        .spawn()
-        .insert(tag)
-        .insert(FootRight)
-        .insert(propagated.get::<FootRight>().clone())
-        .insert_bundle(rigid_body_bundle(propagated.get::<FootRight>()))
-        .insert_bundle(collider_bundle::<T>(ColliderShape::ball(0.1)))
-        .insert(ColliderDebugRender::with_id(1))
-        .insert(RigidBodyPositionSync::Discrete)
-        .id();
-
-    let upper_arm_left = commands
-        .spawn()
-        .insert(tag)
-        .insert(UpperArmLeft)
-        .insert(propagated.get::<UpperArmLeft>().clone())
-        .insert_bundle(rigid_body_bundle(propagated.get::<UpperArmLeft>()))
-        .insert_bundle(collider_bundle::<T>(ColliderShape::ball(0.1)))
-        .insert(ColliderDebugRender::with_id(1))
-        .insert(RigidBodyPositionSync::Discrete)
-        .id();
-
-    let forearm_left = commands
-        .spawn()
-        .insert(tag)
-        .insert(ForearmLeft)
-        .insert(propagated.get::<ForearmLeft>().clone())
-        .insert_bundle(rigid_body_bundle(propagated.get::<ForearmLeft>()))
-        .insert_bundle(collider_bundle::<T>(ColliderShape::ball(0.1)))
-        .insert(ColliderDebugRender::with_id(1))
-        .insert(RigidBodyPositionSync::Discrete)
-        .id();
-
-    let hand_left = commands
-        .spawn()
-        .insert(tag)
-        .insert(HandLeft)
-        .insert(propagated.get::<HandLeft>().clone())
-        .insert_bundle(rigid_body_bundle(propagated.get::<HandLeft>()))
-        .insert_bundle(collider_bundle::<T>(ColliderShape::ball(0.1)))
-        .insert(ColliderDebugRender::with_id(1))
-        .insert(RigidBodyPositionSync::Discrete)
-        .id();
-
-    let upper_arm_right = commands
-        .spawn()
-        .insert(tag)
-        .insert(UpperArmRight)
-        .insert(propagated.get::<UpperArmRight>().clone())
-        .insert_bundle(rigid_body_bundle(propagated.get::<UpperArmRight>()))
-        .insert_bundle(collider_bundle::<T>(ColliderShape::ball(0.1)))
-        .insert(ColliderDebugRender::with_id(1))
-        .insert(RigidBodyPositionSync::Discrete)
-        .id();
-
-    let forearm_right = commands
-        .spawn()
-        .insert(tag)
-        .insert(ForearmRight)
-        .insert(propagated.get::<ForearmRight>().clone())
-        .insert_bundle(rigid_body_bundle(propagated.get::<ForearmRight>()))
-        .insert_bundle(collider_bundle::<T>(ColliderShape::ball(0.1)))
-        .insert(ColliderDebugRender::with_id(1))
-        .insert(RigidBodyPositionSync::Discrete)
-        .id();
-
-    let hand_right = commands
-        .spawn()
-        .insert(tag)
-        .insert(HandRight)
-        .insert(propagated.get::<HandRight>().clone())
-        .insert_bundle(rigid_body_bundle(propagated.get::<HandRight>()))
-        .insert_bundle(collider_bundle::<T>(ColliderShape::ball(0.1)))
-        .insert(ColliderDebugRender::with_id(1))
-        .insert(RigidBodyPositionSync::Discrete)
-        .id();
-
-    joint::<Hip, Spine, _>(commands, tag, &body, hip, spine);
-    joint::<Spine, Chest, _>(commands, tag, &body, spine, chest);
-    joint::<Chest, Neck, _>(commands, tag, &body, chest, neck);
-    joint::<Neck, Head, _>(commands, tag, &body, neck, head);
-    joint::<Hip, ThighLeft, _>(commands, tag, &body, hip, thigh_left);
-    joint::<ThighLeft, ShinLeft, _>(commands, tag, &body, thigh_left, shin_left);
-    joint::<ShinLeft, FootLeft, _>(commands, tag, &body, shin_left, foot_left);
-    joint::<Hip, ThighRight, _>(commands, tag, &body, hip, thigh_right);
-    joint::<ThighRight, ShinRight, _>(commands, tag, &body, thigh_right, shin_right);
-    joint::<ShinRight, FootRight, _>(commands, tag, &body, shin_right, foot_right);
-    joint::<Chest, UpperArmLeft, _>(commands, tag, &body, chest, upper_arm_left);
-    joint::<UpperArmLeft, ForearmLeft, _>(commands, tag, &body, upper_arm_left, forearm_left);
-    joint::<ForearmLeft, HandLeft, _>(commands, tag, &body, forearm_left, hand_left);
-    joint::<Chest, UpperArmRight, _>(commands, tag, &body, chest, upper_arm_right);
-    joint::<UpperArmRight, ForearmRight, _>(commands, tag, &body, upper_arm_right, forearm_right);
-    joint::<ForearmRight, HandRight, _>(commands, tag, &body, forearm_right, hand_right);
+    joint::<Hip, Spine, _>(commands, &body, hip, spine);
+    joint::<Spine, Chest, _>(commands, &body, spine, chest);
+    joint::<Chest, Neck, _>(commands, &body, chest, neck);
+    joint::<Neck, Head, _>(commands, &body, neck, head);
+    joint::<Hip, ThighLeft, _>(commands, &body, hip, thigh_left);
+    joint::<ThighLeft, ShinLeft, _>(commands, &body, thigh_left, shin_left);
+    joint::<ShinLeft, FootLeft, _>(commands, &body, shin_left, foot_left);
+    joint::<Hip, ThighRight, _>(commands, &body, hip, thigh_right);
+    joint::<ThighRight, ShinRight, _>(commands, &body, thigh_right, shin_right);
+    joint::<ShinRight, FootRight, _>(commands, &body, shin_right, foot_right);
+    joint::<Chest, UpperArmLeft, _>(commands, &body, chest, upper_arm_left);
+    joint::<UpperArmLeft, ForearmLeft, _>(commands, &body, upper_arm_left, forearm_left);
+    joint::<ForearmLeft, HandLeft, _>(commands, &body, forearm_left, hand_left);
+    joint::<Chest, UpperArmRight, _>(commands, &body, chest, upper_arm_right);
+    joint::<UpperArmRight, ForearmRight, _>(commands, &body, upper_arm_right, forearm_right);
+    joint::<ForearmRight, HandRight, _>(commands, &body, forearm_right, hand_right);
 
     // Lock hip's rotation by connecting to the ground (locking with mass properties causes panic).
     let ground = commands
@@ -333,63 +148,102 @@ fn create_player<T: Player + Copy>(commands: &mut Commands, tag: T, z: f32) {
     commands
         .spawn()
         .insert(JointBuilderComponent::new(joint, ground, hip));
+
+    // PlayerBody
+    commands.insert_resource(body);
+}
+
+fn spawn_body_part<T: Player, C: BodyPart>(
+    commands: &mut Commands,
+    body: &PlayerBody<T>,
+    collider_builder: fn(&Transform) -> ColliderBundle,
+) -> Entity {
+    commands
+        .spawn()
+        .insert(T::default())
+        .insert(C::default())
+        .insert(body.absolute.get::<C>().clone())
+        .insert_bundle(rigid_body_bundle(body.absolute.get::<C>()))
+        .insert_bundle(collider_builder(body.relative.get::<C>()))
+        .insert(ColliderDebugRender::with_id(1))
+        .insert(ColliderPositionSync::Discrete)
+        .id()
 }
 
 fn joint<Parent: Component, Child: Component, T: Player>(
     commands: &mut Commands,
-    tag: T,
-    body: &Body,
+    body: &PlayerBody<T>,
     parent: Entity,
     child: Entity,
 ) {
-    let child_translation = body.get::<Child>().translation;
+    let stiffness = 1.5;
+    let damping = 1.5;
+    let child_translation = body.relative.get::<Child>().translation;
     let joint = SphericalJoint::new()
         .local_anchor2((-child_translation).into())
-        .motor_position(JointAxis::AngX, 0.0, 1.5, 1.5)
-        .motor_position(JointAxis::AngY, 0.0, 1.5, 1.5)
-        .motor_position(JointAxis::AngZ, 0.0, 1.5, 1.5)
+        .motor_position(JointAxis::AngX, 0.0, stiffness, damping)
+        .motor_position(JointAxis::AngY, 0.0, stiffness, damping)
+        .motor_position(JointAxis::AngZ, 0.0, stiffness, damping)
         .motor_model(JointAxis::AngX, MotorModel::VelocityBased)
         .motor_model(JointAxis::AngY, MotorModel::VelocityBased)
         .motor_model(JointAxis::AngZ, MotorModel::VelocityBased);
     let joint = JointBuilderComponent::new(joint, parent, child);
     commands
         .spawn()
-        .insert(tag)
+        .insert(T::default())
         .insert(Joint::<Parent, Child>::default())
+        .insert(JointMotorParams { stiffness, damping })
         .insert(joint);
 }
 
 fn head_baloon_system<T: Player>(
-    mut head: Query<(&mut RigidBodyForcesComponent, &Transform), (With<T>, With<Head>)>,
+    body: Res<PlayerBody<T>>,
+    mut head: Query<
+        (&mut RigidBodyForcesComponent, &RigidBodyPositionComponent),
+        (With<T>, With<Head>),
+    >,
 ) {
-    for (mut forces, _transform) in head.iter_mut() {
-        forces.force += vector!(0.0, 0.45, 0.0);
+    for (mut forces, pos) in head.iter_mut() {
+        let diff = body.absolute.get::<Head>().translation - Vec3::from(pos.position.translation);
+        forces.force += Vector3::from(diff * 2.0);
     }
 }
 
 fn hand_baloon_system<T: Player>(
-    mut head: Query<
-        (&mut RigidBodyForcesComponent, &Transform),
-        (With<T>, Or<(With<HandLeft>, With<HandRight>)>),
+    body: Res<PlayerBody<T>>,
+    mut left: Query<
+        (&mut RigidBodyForcesComponent, &RigidBodyPositionComponent),
+        (With<T>, With<HandLeft>, Without<HandRight>),
+    >,
+    mut right: Query<
+        (&mut RigidBodyForcesComponent, &RigidBodyPositionComponent),
+        (With<T>, With<HandRight>, Without<HandLeft>),
     >,
 ) {
-    for (mut forces, _transform) in head.iter_mut() {
-        forces.force += vector!(0.0, 0.06, 0.0);
+    for (mut forces, pos) in left.iter_mut() {
+        let diff = body.absolute.get::<HandLeft>().translation.y - pos.position.translation.y;
+        forces.force += vector!(0.0, diff * 1.0, 0.0);
+    }
+    for (mut forces, pos) in right.iter_mut() {
+        let diff = body.absolute.get::<HandRight>().translation.y - pos.position.translation.y;
+        forces.force += vector!(0.0, diff * 1.0, 0.0);
     }
 }
 
 fn angular_spring_system<T: Player, Parent: Component, Child: Component>(
-    mut parent: Query<&Transform, (With<Parent>, With<T>)>,
-    mut child: Query<&Transform, (With<Child>, With<T>)>,
-    mut joint: Query<&JointHandleComponent, (With<Joint<Parent, Child>>, With<T>)>,
+    body: Res<PlayerBody<T>>,
+    joint: Query<(&JointHandleComponent, &JointMotorParams), (With<Joint<Parent, Child>>, With<T>)>,
     mut joints: ResMut<ImpulseJointSet>,
 ) {
-    if let Ok((parent, child, joint_handle)) = parent
-        .get_single()
-        .and_then(|parent| Ok((parent, child.get_single()?)))
-        .and_then(|(parent, child)| Ok((parent, child, joint.get_single()?)))
-    {
+    if let Ok((joint_handle, JointMotorParams { stiffness, damping })) = joint.get_single() {
         let joint = joints.get_mut(joint_handle.handle()).unwrap();
+        let transform = body.relative.get::<Parent>();
+        let angles = dbg!(transform.rotation.to_euler(EulerRot::XYZ));
+        joint.data = joint
+            .data
+            .motor_position(JointAxis::AngX, angles.0, *stiffness, *damping)
+            .motor_position(JointAxis::AngY, angles.1, *stiffness, *damping)
+            .motor_position(JointAxis::AngZ, angles.2, *stiffness, *damping);
     }
 }
 
@@ -411,10 +265,58 @@ fn rigid_body_bundle(transform: &Transform) -> RigidBodyBundle {
     }
 }
 
-fn collider_bundle<T: Player>(shape: ColliderShape) -> ColliderBundle {
+fn collider_bundle<T: Player>(position: Vec3, shape: ColliderShape) -> ColliderBundle {
     ColliderBundle {
+        position: position.into(),
         shape: shape.into(),
         flags: collider_flags(T::get_collision_tag()).into(),
         ..Default::default()
     }
+}
+
+fn small_collider<T: Player>(transform: &Transform) -> ColliderBundle {
+    ColliderBundle {
+        mass_properties: ColliderMassProps::Density(50.0).into(),
+        ..collider_bundle::<T>(Vec3::ZERO, ColliderShape::cuboid(0.05, 0.05, 0.05))
+    }
+}
+
+fn torso_collider<T: Player>(transform: &Transform) -> ColliderBundle {
+    let vec = transform.translation;
+    collider_bundle::<T>(
+        (-vec / 2.0).into(),
+        ColliderShape::cuboid(TORSO_WIDTH / 2.0, vec.y / 2.0, TORSO_THICKNESS / 2.0),
+    )
+}
+
+fn neck_collider<T: Player>(transform: &Transform) -> ColliderBundle {
+    let vec = transform.translation;
+    collider_bundle::<T>(
+        -vec / 2.0,
+        ColliderShape::cuboid(NECK_RADIUS, vec.y / 2.0, NECK_RADIUS),
+    )
+}
+
+fn head_collider<T: Player>(transform: &Transform) -> ColliderBundle {
+    let vec = transform.translation;
+    collider_bundle::<T>(
+        -vec / 2.0,
+        ColliderShape::cuboid(HEAD_RADIUS, vec.y / 2.0, HEAD_RADIUS),
+    )
+}
+
+fn arm_collider<T: Player>(transform: &Transform) -> ColliderBundle {
+    let vec = transform.translation;
+    collider_bundle::<T>(
+        (-vec / 2.0).into(),
+        ColliderShape::cuboid(vec.x.abs() / 2.0, ARM_RADIUS, ARM_RADIUS),
+    )
+}
+
+fn leg_collider<T: Player>(transform: &Transform) -> ColliderBundle {
+    let vec = transform.translation;
+    collider_bundle::<T>(
+        (-vec / 2.0).into(),
+        ColliderShape::cuboid(LEG_RADIUS, vec.y.abs() / 2.0, LEG_RADIUS),
+    )
 }

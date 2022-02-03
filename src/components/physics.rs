@@ -23,3 +23,9 @@ impl<A, B> Default for Joint<A, B> {
         Self(Default::default())
     }
 }
+
+#[derive(Component)]
+pub struct JointMotorParams {
+    pub stiffness: f32,
+    pub damping: f32,
+}
