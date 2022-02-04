@@ -13,12 +13,17 @@ use components::{
     player::{Player, Player1, Player2},
 };
 use systems::{
-    active_ragdoll::{hand_baloon_system, head_baloon_system},
+    active_ragdoll::{hand_baloon_system, head_baloon_system, hip_baloon_system},
+    control::{keyboard_input, touch_input, move_system},
     setup_player::setup_player,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, SystemLabel)]
-pub enum HugSystems {}
+pub enum HugSystems {
+    InputSystem,
+    MoveSystem,
+    ProgagateTransformSystem,
+}
 
 #[bevy_main]
 fn main() {
@@ -31,11 +36,26 @@ fn main() {
         .add_startup_system(setup_player)
         .add_system_set(
             SystemSet::new()
+                .label(HugSystems::InputSystem)
+                .with_system(keyboard_input)
+                .with_system(touch_input),
+        )
+        .add_system_set(
+            SystemSet::new()
+                .label(HugSystems::MoveSystem)
+                .after(HugSystems::InputSystem)
+                .with_system(move_system::<Player1>)
+                .with_system(move_system::<Player2>),
+        )
+        .add_system_set(
+            SystemSet::new()
                 .before(PhysicsSystems::StepWorld)
                 .with_system(head_baloon_system::<Player1>)
                 .with_system(hand_baloon_system::<Player1>)
+                .with_system(hip_baloon_system::<Player1>)
                 .with_system(head_baloon_system::<Player2>)
                 .with_system(hand_baloon_system::<Player2>)
+                .with_system(hip_baloon_system::<Player2>)
                 .with_system(angular_spring_system::<Player1, UpperArmLeft, ForearmLeft>)
                 .with_system(angular_spring_system::<Player1, ForearmLeft, HandLeft>)
                 .with_system(angular_spring_system::<Player1, UpperArmRight, ForearmRight>)
@@ -77,16 +97,26 @@ fn setup(
     // light
     commands.spawn_bundle(PointLightBundle {
         point_light: PointLight {
-            intensity: 1500.0,
+            intensity: 800.0,
             shadows_enabled: true,
             ..Default::default()
         },
-        transform: Transform::from_xyz(4.0, 8.0, 4.0),
+        transform: Transform::from_xyz(4.0, 3.0, 4.0),
+        ..Default::default()
+    });
+    // light
+    commands.spawn_bundle(PointLightBundle {
+        point_light: PointLight {
+            intensity: 800.0,
+            shadows_enabled: true,
+            ..Default::default()
+        },
+        transform: Transform::from_xyz(-4.0, 3.0, 4.0),
         ..Default::default()
     });
     // camera
     commands.spawn_bundle(PerspectiveCameraBundle {
-        transform: Transform::from_xyz(-5.0, 2.0, 5.0)
+        transform: Transform::from_xyz(-2.0, 2.0, 2.0)
             .looking_at(Vec3::new(0.0, 1.5, 0.0), Vec3::Y),
         ..Default::default()
     });
@@ -100,7 +130,7 @@ fn angular_spring_system<T: Player, Parent: Component, Child: Component>(
     if let Ok((joint_handle, JointMotorParams { stiffness, damping })) = joint.get_single() {
         let joint = joints.get_mut(joint_handle.handle()).unwrap();
         let transform = body.relative.get::<Parent>();
-        let angles = dbg!(transform.rotation.to_euler(EulerRot::XYZ));
+        let angles = transform.rotation.to_euler(EulerRot::XYZ);
         joint.data = joint
             .data
             .motor_position(JointAxis::AngX, angles.0, *stiffness, *damping)

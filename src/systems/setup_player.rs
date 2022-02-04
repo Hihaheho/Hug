@@ -3,13 +3,14 @@ use bevy_rapier3d::prelude::*;
 
 use crate::components::{
     body::{part::*, *},
+    control::HandControl,
     physics::{CollisionTag, Joint, JointMotorParams},
     player::{Player, Player1, Player2},
 };
 
 pub fn setup_player(mut commands: Commands) {
-    create_player::<Player1>(&mut commands, 1.0);
-    create_player::<Player2>(&mut commands, -1.0);
+    create_player::<Player1>(&mut commands, 0.2);
+    create_player::<Player2>(&mut commands, -0.2);
 }
 
 fn create_player<T: Player + Copy>(commands: &mut Commands, z: f32) {
@@ -19,6 +20,8 @@ fn create_player<T: Player + Copy>(commands: &mut Commands, z: f32) {
     let propagated = body.propagated();
 
     let body = PlayerBody::<T>::new(body.clone(), propagated.clone());
+
+    commands.insert_resource(HandControl::<T>::default());
 
     let hip = spawn_body_part::<T, Hip>(commands, &body, small_collider::<T>);
     let spine = spawn_body_part::<T, Spine>(commands, &body, torso_collider::<T>);
@@ -149,7 +152,7 @@ fn head_collider<T: Player>(transform: &Transform) -> ColliderBundle {
     let vec = transform.translation;
     collider_bundle::<T>(
         -vec / 2.0,
-        ColliderShape::cuboid(HEAD_RADIUS, vec.y / 2.0, HEAD_RADIUS),
+        ColliderShape::cuboid(HEAD_WIDTH / 2.0, vec.y / 2.0, HEAD_THICKNESS / 2.0),
     )
 }
 

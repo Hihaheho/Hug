@@ -16,18 +16,19 @@ pub trait BodyPart: Component + Default {}
 
 pub const HEIGHT: f32 = 1.7;
 pub const RATIO: f32 = HEIGHT / 15.0;
-pub const TORSO_WIDTH: f32 = 3.8 * RATIO;
-pub const TORSO_THICKNESS: f32 = 1.8 * RATIO;
+pub const TORSO_WIDTH: f32 = 4.0 * RATIO;
+pub const TORSO_THICKNESS: f32 = 1.4 * RATIO;
 // pub const TORSO_ROUNDNESS: f32 = 0.1;
 pub const NECK_RADIUS: f32 = 0.8 * RATIO;
-pub const HEAD_RADIUS: f32 = 1.6 * RATIO;
+pub const HEAD_WIDTH: f32 = 3.5 * RATIO;
+pub const HEAD_THICKNESS: f32 = 2.2 * RATIO;
 pub const ARM_RADIUS: f32 = 0.6 * RATIO;
 pub const LEG_RADIUS: f32 = 0.8 * RATIO;
 pub const SHIN_LENGTH: f32 = 3.5 * RATIO;
 pub const THIGH_LENGTH: f32 = 3.5 * RATIO;
-pub const SHOULDER_LENGTH: f32 = 2.0 * RATIO;
-pub const FOREARM_LENGTH: f32 = 2.5 * RATIO;
-pub const UPPER_ARM_LENGTH: f32 = 2.5 * RATIO;
+pub const SHOULDER_LENGTH: f32 = 2.1 * RATIO;
+pub const FOREARM_LENGTH: f32 = 3.0 * RATIO;
+pub const UPPER_ARM_LENGTH: f32 = 3.0 * RATIO;
 pub const PELVIS_LENGTH: f32 = 1.5 * RATIO;
 
 #[derive(Component, Default)]
@@ -56,9 +57,9 @@ impl Default for Body {
         body.0
             .insert(Hip.type_id(), Transform::from_xyz(0.0, 7. * RATIO, 0.0));
         body.0
-            .insert(Spine.type_id(), Transform::from_xyz(0.0, 2. * RATIO, 0.0));
+            .insert(Spine.type_id(), Transform::from_xyz(0.0, 2.5 * RATIO, 0.0));
         body.0
-            .insert(Chest.type_id(), Transform::from_xyz(0.0, 2. * RATIO, 0.0));
+            .insert(Chest.type_id(), Transform::from_xyz(0.0, 2.5 * RATIO, 0.0));
         body.0
             .insert(Neck.type_id(), Transform::from_xyz(0.0, 1. * RATIO, 0.0));
         body.0

@@ -15,6 +15,19 @@ pub fn head_baloon_system<T: Player>(
 ) {
     for (mut forces, pos) in head.iter_mut() {
         let diff = body.absolute.get::<Head>().translation - Vec3::from(pos.position.translation);
+        forces.force += Vector3::from(diff * 3.0);
+    }
+}
+
+pub fn hip_baloon_system<T: Player>(
+    body: Res<PlayerBody<T>>,
+    mut head: Query<
+        (&mut RigidBodyForcesComponent, &RigidBodyPositionComponent),
+        (With<T>, With<Hip>),
+    >,
+) {
+    for (mut forces, pos) in head.iter_mut() {
+        let diff = body.absolute.get::<Hip>().translation - Vec3::from(pos.position.translation);
         forces.force += Vector3::from(diff * 2.0);
     }
 }
