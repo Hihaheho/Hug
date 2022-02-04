@@ -24,7 +24,7 @@ impl<T> Default for HandControl<T> {
 }
 
 const SHOULDER_Y_MAX: f32 = PI * 4.0 / 7.0 / 2.0;
-const ELBOW_Y_MAX: f32 = PI * 4.0 / 7.0 / 2.0;
+const ELBOW_Y_MAX: f32 = PI * 3.8 / 7.0 / 2.0;
 const SHOULDER_Z_MIN: f32 = -PI * 8.0 / 9.0 / 4.0;
 const SHOULDER_Z_MAX: f32 = PI * 8.0 / 9.0 / 4.0;
 

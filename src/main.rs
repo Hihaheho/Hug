@@ -1,7 +1,12 @@
 mod components;
 mod systems;
 
-use bevy::prelude::{shape as bevy_shape, *};
+use std::f32::consts::PI;
+
+use bevy::{
+    audio::AudioPlugin,
+    prelude::{shape as bevy_shape, *},
+};
 use bevy_rapier3d::{
     na::{Normed, Vector3},
     physics::{JointHandleComponent, PhysicsSystems},
@@ -14,7 +19,7 @@ use components::{
 };
 use systems::{
     active_ragdoll::{hand_baloon_system, head_baloon_system, hip_baloon_system},
-    control::{keyboard_input, touch_input, move_system},
+    control::{keyboard_input, move_system, touch_input},
     setup_player::setup_player,
 };
 
@@ -27,45 +32,50 @@ pub enum HugSystems {
 
 #[bevy_main]
 fn main() {
+    // #[cfg(target_arch = "wasm32")]
+    // console_error_panic_hook::set_once();
+
     let mut app = App::new();
 
-    app.add_plugins(DefaultPlugins)
-        .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
-        .add_plugin(RapierRenderPlugin)
-        .add_startup_system(setup)
-        .add_startup_system(setup_player)
-        .add_system_set(
-            SystemSet::new()
-                .label(HugSystems::InputSystem)
-                .with_system(keyboard_input)
-                .with_system(touch_input),
-        )
-        .add_system_set(
-            SystemSet::new()
-                .label(HugSystems::MoveSystem)
-                .after(HugSystems::InputSystem)
-                .with_system(move_system::<Player1>)
-                .with_system(move_system::<Player2>),
-        )
-        .add_system_set(
-            SystemSet::new()
-                .before(PhysicsSystems::StepWorld)
-                .with_system(head_baloon_system::<Player1>)
-                .with_system(hand_baloon_system::<Player1>)
-                .with_system(hip_baloon_system::<Player1>)
-                .with_system(head_baloon_system::<Player2>)
-                .with_system(hand_baloon_system::<Player2>)
-                .with_system(hip_baloon_system::<Player2>)
-                .with_system(angular_spring_system::<Player1, UpperArmLeft, ForearmLeft>)
-                .with_system(angular_spring_system::<Player1, ForearmLeft, HandLeft>)
-                .with_system(angular_spring_system::<Player1, UpperArmRight, ForearmRight>)
-                .with_system(angular_spring_system::<Player1, ForearmRight, HandRight>)
-                .with_system(angular_spring_system::<Player1, ThighLeft, ShinLeft>)
-                .with_system(angular_spring_system::<Player1, ShinLeft, FootLeft>)
-                .with_system(angular_spring_system::<Player1, ThighRight, ShinRight>)
-                .with_system(angular_spring_system::<Player1, ShinRight, FootRight>),
-        )
-        .add_system_set(SystemSet::new().after(PhysicsSystems::StepWorld));
+    // #[cfg(target_arch = "wasm32")]
+    // app.add_system(systems::wasm::resize);
+
+    app.add_plugins_with(DefaultPlugins, |plugins| plugins.disable::<AudioPlugin>())
+        // .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
+        // .add_plugin(RapierRenderPlugin)
+        .add_startup_system(setup);
+    // .add_startup_system(setup_player);
+    // .add_system_set(
+    //     SystemSet::new()
+    //         .label(HugSystems::InputSystem)
+    //         .with_system(keyboard_input)
+    //         .with_system(touch_input),
+    // )
+    // .add_system_set(
+    //     SystemSet::new()
+    //         .label(HugSystems::MoveSystem)
+    //         .after(HugSystems::InputSystem)
+    //         .with_system(move_system::<Player1>)
+    //         .with_system(move_system::<Player2>),
+    // )
+    // .add_system_set(
+    //     SystemSet::new()
+    //         .before(PhysicsSystems::StepWorld)
+    //         .with_system(head_baloon_system::<Player1>)
+    //         .with_system(hand_baloon_system::<Player1>)
+    //         .with_system(hip_baloon_system::<Player1>)
+    //         .with_system(head_baloon_system::<Player2>)
+    //         .with_system(hand_baloon_system::<Player2>)
+    //         .with_system(hip_baloon_system::<Player2>)
+    //         .with_system(angular_spring_system::<Player1, UpperArmLeft, ForearmLeft>)
+    //         .with_system(angular_spring_system::<Player1, ForearmLeft, HandLeft>)
+    //         .with_system(angular_spring_system::<Player1, UpperArmRight, ForearmRight>)
+    //         .with_system(angular_spring_system::<Player1, ForearmRight, HandRight>)
+    //         .with_system(angular_spring_system::<Player1, ThighLeft, ShinLeft>)
+    //         .with_system(angular_spring_system::<Player1, ShinLeft, FootLeft>)
+    //         .with_system(angular_spring_system::<Player1, ThighRight, ShinRight>)
+    //         .with_system(angular_spring_system::<Player1, ShinRight, FootRight>),
+    // );
 
     // bevy_mod_debugdump::print_schedule(&mut app);
 
@@ -80,7 +90,7 @@ fn setup(
     // plane
     commands
         .spawn_bundle(PbrBundle {
-            mesh: meshes.add(Mesh::from(bevy_shape::Plane { size: 5.0 })),
+            mesh: meshes.add(Mesh::from(bevy_shape::Plane { size: 7.0 })),
             material: materials.add(Color::rgb(0.1, 0.2, 0.3).into()),
             ..Default::default()
         })
@@ -94,6 +104,24 @@ fn setup(
             ..Default::default()
         });
 
+    // wall left
+    commands.spawn_bundle(PbrBundle {
+        transform: Transform::from_translation(Vec3::new(0.0, 0.1, -4.0))
+            .with_rotation(Quat::from_rotation_x(PI / 2.0)),
+        mesh: meshes.add(Mesh::from(bevy_shape::Plane { size: 15.0 })),
+        material: materials.add(Color::rgb(0.1, 0.2, 0.3).into()),
+        ..Default::default()
+    });
+
+    // wall right
+    commands.spawn_bundle(PbrBundle {
+        transform: Transform::from_translation(Vec3::new(4.0, 0.1, 0.0))
+            .with_rotation(Quat::from_rotation_z(PI / 2.0)),
+        mesh: meshes.add(Mesh::from(bevy_shape::Plane { size: 15.0 })),
+        material: materials.add(Color::rgb(0.1, 0.2, 0.3).into()),
+        ..Default::default()
+    });
+
     // light
     commands.spawn_bundle(PointLightBundle {
         point_light: PointLight {
@@ -101,22 +129,23 @@ fn setup(
             shadows_enabled: true,
             ..Default::default()
         },
-        transform: Transform::from_xyz(4.0, 3.0, 4.0),
+        transform: Transform::from_xyz(2.0, 3.0, 2.0),
         ..Default::default()
     });
     // light
-    commands.spawn_bundle(PointLightBundle {
-        point_light: PointLight {
-            intensity: 800.0,
-            shadows_enabled: true,
-            ..Default::default()
-        },
-        transform: Transform::from_xyz(-4.0, 3.0, 4.0),
-        ..Default::default()
-    });
+    // commands.spawn_bundle(PointLightBundle {
+    //     point_light: PointLight {
+    //         intensity: 800.0,
+    //         shadows_enabled: true,
+    //         ..Default::default()
+    //     },
+    //     transform: Transform::from_xyz(-2.0, 3.0, 2.0),
+    //     ..Default::default()
+    // });
+
     // camera
     commands.spawn_bundle(PerspectiveCameraBundle {
-        transform: Transform::from_xyz(-2.0, 2.0, 2.0)
+        transform: Transform::from_xyz(-1.5, 1.5, 2.0)
             .looking_at(Vec3::new(0.0, 1.5, 0.0), Vec3::Y),
         ..Default::default()
     });

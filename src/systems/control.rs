@@ -7,12 +7,18 @@ use crate::components::{
 };
 
 pub fn touch_input(
-    mut control: Res<HandControl<Player1>>,
+    mut control: ResMut<HandControl<Player1>>,
     touches: Res<Touches>,
     windows: Res<Windows>,
 ) {
     let window = windows.get_primary().unwrap();
-    for touch in touches.iter() {}
+    for touch in touches.iter() {
+        if touch.start_position().x < window.width() / 2.0 {
+            control.add_left(touch.delta());
+        } else {
+            control.add_right(touch.delta());
+        }
+    }
 }
 
 pub fn keyboard_input(
@@ -48,7 +54,7 @@ pub fn keyboard_input(
 
 pub fn move_system<T: Player>(control: Res<HandControl<T>>, mut body: ResMut<PlayerBody<T>>) {
     if control.is_changed() {
-        let (a, b, c) = dbg!(control.left_sholder());
+        let (a, b, c) = control.left_sholder();
         body.relative.get_mut::<UpperArmLeft>().rotation = Quat::from_euler(EulerRot::XYZ, a, b, c);
         let (a, b, c) = control.right_sholder();
         body.relative.get_mut::<UpperArmRight>().rotation =

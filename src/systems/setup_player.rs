@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::prelude::{*, shape as bshape};
 use bevy_rapier3d::prelude::*;
 
 use crate::components::{
@@ -79,6 +79,14 @@ fn create_player<T: Player + Copy>(commands: &mut Commands, z: f32) {
     commands.insert_resource(body);
 }
 
+// fn insert_mesh<T: Player, P: BodyPart>(commands: &mut Commands, body: &PlayerBody<T>, part: Entity, builder: fn(&Transform) -> Mesh) {
+// 	let transform = body.relative.get::<P>();
+// 	commands.entity(part).insert_bundle(PbrBundle {
+// 		mesh: builder(transform),
+// 		..Default::default()
+// 	});
+// }
+
 fn spawn_body_part<T: Player, C: BodyPart>(
     commands: &mut Commands,
     body: &PlayerBody<T>,
@@ -138,6 +146,11 @@ fn torso_collider<T: Player>(transform: &Transform) -> ColliderBundle {
         (-vec / 2.0).into(),
         ColliderShape::cuboid(TORSO_WIDTH / 2.0, vec.y / 2.0, TORSO_THICKNESS / 2.0),
     )
+}
+
+fn torso_mesh<T: Player>(transform: &Transform) -> Mesh {
+    let vec = transform.translation;
+	Mesh::from(bshape::Box::new(TORSO_WIDTH, vec.y, TORSO_THICKNESS))
 }
 
 fn neck_collider<T: Player>(transform: &Transform) -> ColliderBundle {

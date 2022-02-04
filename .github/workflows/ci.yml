@@ -1,0 +1,31 @@
+name: CI
+on:
+  push:
+    branches:
+      - main
+env:
+  CARGO_INCREMENTAL: 0
+  RUST_BACKTRACE: short
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+
+      - uses: Swatinem/rust-cache@v1
+
+      - run: rustup target add wasm32-unknown-unknown
+      - run: cargo install wasm-bindgen-cli --version 0.2.79
+
+      - name: Build wasm
+        run: cargo build --target wasm32-unknown-unknown --release --features web
+
+      - name: wasm-bindgen
+        run: wasm-bindgen --out-dir .public --target web target/wasm32-unknown-unknown/release/hug.wasm
+
+      - uses: JamesIves/github-pages-deploy-action@4.1.4
+        with:
+          branch: gh-pages
+          folder: .public

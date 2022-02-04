@@ -61,7 +61,7 @@ impl Default for Body {
         body.0
             .insert(Chest.type_id(), Transform::from_xyz(0.0, 2.5 * RATIO, 0.0));
         body.0
-            .insert(Neck.type_id(), Transform::from_xyz(0.0, 1. * RATIO, 0.0));
+            .insert(Neck.type_id(), Transform::from_xyz(0.0, 0.8 * RATIO, 0.0));
         body.0
             .insert(Head.type_id(), Transform::from_xyz(0.0, 3. * RATIO, 0.0));
         body.0.insert(

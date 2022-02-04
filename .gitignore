@@ -1,2 +1,8 @@
-/target
-.DS_Store
+/*
+!.github
+!/.public/index.html
+!/assets/
+!/src/
+!.gitignore
+!Cargo.lock
+!Cargo.toml

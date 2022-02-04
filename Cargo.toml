@@ -3,10 +3,16 @@ name = "hug"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[features]
+web = ["bevy_rapier3d/wasm-bindgen"]
 
 [dependencies]
 bevy = "0.6"
 bevy_rapier3d = "0.12.0"
 bevy_mod_debugdump = "0.3"
 bitflags = "1.3"
+console_error_panic_hook = "0.1"
+web-sys = "0.3"
+
+[patch.crates-io]
+bevy = { git = "https://github.com/bevyengine/bevy", rev = "3431335ee9a2e3cfda81485d8080f85c0bc50461" }
