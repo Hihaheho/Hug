@@ -11,12 +11,13 @@ pub fn touch_input(
     touches: Res<Touches>,
     windows: Res<Windows>,
 ) {
-    let window = windows.get_primary().unwrap();
-    for touch in touches.iter() {
-        if touch.start_position().x < window.width() / 2.0 {
-            control.add_left(touch.delta());
-        } else {
-            control.add_right(touch.delta());
+    if let Some(window) = windows.get_primary() {
+        for touch in touches.iter() {
+            if touch.start_position().x < window.width() / 2.0 {
+                control.add_left(touch.delta());
+            } else {
+                control.add_right(touch.delta());
+            }
         }
     }
 }

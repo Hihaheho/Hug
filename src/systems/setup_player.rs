@@ -14,12 +14,21 @@ use crate::components::{
     player::{Player, Player1, Player2},
 };
 
-pub fn setup_player(mut commands: Commands) {
-    create_player::<Player1>(&mut commands, 0.2);
-    create_player::<Player2>(&mut commands, -0.2);
+pub fn setup_player(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    create_player::<Player1>(&mut commands, &mut meshes, &mut materials, 0.2);
+    create_player::<Player2>(&mut commands, &mut meshes, &mut materials, -0.2);
 }
 
-fn create_player<T: Player + Copy>(commands: &mut Commands, z: f32) {
+fn create_player<T: Player + Copy>(
+    commands: &mut Commands,
+    meshes: &mut Assets<Mesh>,
+    materials: &mut Assets<StandardMaterial>,
+    z: f32,
+) {
     let mut body = Body::default();
     body.get_mut::<Hip>().translation.z = z;
     body.get_mut::<Hip>().translation.y += 0.1;
@@ -81,6 +90,11 @@ fn create_player<T: Player + Copy>(commands: &mut Commands, z: f32) {
         .spawn()
         .insert(JointBuilderComponent::new(joint, ground, hip));
 
+    let m = materials.add(Color::rgb(0.7, 0.3, 0.5).into());
+    insert_mesh::<T, Spine>(commands, meshes, m.clone(), &body, spine, torso_mesh::<T>);
+    insert_mesh::<T, Chest>(commands, meshes, m.clone(), &body, chest, torso_mesh::<T>);
+    insert_mesh::<T, Neck>(commands, meshes, m.clone(), &body, neck, neck_mesh::<T>);
+
     // PlayerBody
     commands.insert_resource(body);
 }
@@ -88,6 +102,7 @@ fn create_player<T: Player + Copy>(commands: &mut Commands, z: f32) {
 fn insert_mesh<T: Player, P: BodyPart>(
     commands: &mut Commands,
     meshes: &mut Assets<Mesh>,
+    material: Handle<StandardMaterial>,
     body: &PlayerBody<T>,
     part: Entity,
     builder: fn(&Transform) -> Mesh,
@@ -95,6 +110,7 @@ fn insert_mesh<T: Player, P: BodyPart>(
     let transform = body.relative.get::<P>();
     commands.entity(part).insert_bundle(PbrBundle {
         mesh: meshes.add(builder(transform)),
+        material,
         ..Default::default()
     });
 }
@@ -179,6 +195,15 @@ fn neck_collider<T: Player>(transform: &Transform) -> ColliderBundle {
         -vec / 2.0,
         ColliderShape::cuboid(NECK_RADIUS, vec.y / 2.0, NECK_RADIUS),
     )
+}
+
+fn neck_mesh<T: Player>(transform: &Transform) -> Mesh {
+    let vec = transform.translation;
+    Mesh::from(bshape::Box::new(
+        NECK_RADIUS * 2.0,
+        vec.y,
+        NECK_RADIUS * 2.0,
+    ))
 }
 
 fn head_collider<T: Player>(transform: &Transform) -> ColliderBundle {

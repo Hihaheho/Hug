@@ -4,6 +4,14 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
+default = [
+  "bevy/bevy_winit",
+  "bevy/render",
+  "bevy/x11",
+]
+
+native = [ "bevy/bevy_wgpu" ]
+
 web = ["bevy_rapier3d/wasm-bindgen", "bevy_webgl2"]
 
 [dependencies]
