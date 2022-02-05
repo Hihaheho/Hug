@@ -1,5 +1,11 @@
-use bevy::{prelude::{*, shape as bshape}, ecs::component::Component};
-use bevy_rapier3d::prelude::*;
+use bevy::{
+    ecs::component::Component,
+    prelude::{shape as bshape, *},
+};
+use bevy_rapier3d::{
+    na::{OPoint, Vector3},
+    prelude::*,
+};
 
 use crate::components::{
     body::{part::*, *},
@@ -61,7 +67,7 @@ fn create_player<T: Player + Copy>(commands: &mut Commands, z: f32) {
     // Lock hip's rotation by connecting to the ground (locking with mass properties causes panic).
     let ground = commands
         .spawn_bundle(RigidBodyBundle {
-            position: Vec3::new(0.0, -0.5, 0.0).into(),
+            position: vector!(0.0, -0.5, 0.0).into(),
             body_type: RigidBodyType::Static.into(),
             ..Default::default()
         })
@@ -87,6 +93,14 @@ fn create_player<T: Player + Copy>(commands: &mut Commands, z: f32) {
 // 	});
 // }
 
+fn to_rapier_vec(vec: Vec3) -> Vector3<f32> {
+    vector!(vec.x, vec.y, vec.z)
+}
+
+fn to_rapier_point(vec: Vec3) -> Point<f32> {
+    point!(vec.x, vec.y, vec.z)
+}
+
 fn spawn_body_part<T: Player, C: BodyPart>(
     commands: &mut Commands,
     body: &PlayerBody<T>,
@@ -98,7 +112,7 @@ fn spawn_body_part<T: Player, C: BodyPart>(
         .insert(C::default())
         .insert(body.absolute.get::<C>().clone())
         .insert_bundle(RigidBodyBundle {
-            position: body.absolute.get::<C>().translation.into(),
+            position: to_rapier_vec(body.absolute.get::<C>().translation).into(),
             ..Default::default()
         })
         .insert_bundle(collider_builder(body.relative.get::<C>()))
@@ -117,7 +131,7 @@ fn joint<Parent: Component, Child: Component, T: Player>(
     let damping = 1.5;
     let child_translation = body.relative.get::<Child>().translation;
     let joint = SphericalJoint::new()
-        .local_anchor2((-child_translation).into())
+        .local_anchor2(to_rapier_point(-child_translation))
         .motor_position(JointAxis::AngX, 0.0, stiffness, damping)
         .motor_position(JointAxis::AngY, 0.0, stiffness, damping)
         .motor_position(JointAxis::AngZ, 0.0, stiffness, damping)
@@ -150,7 +164,7 @@ fn torso_collider<T: Player>(transform: &Transform) -> ColliderBundle {
 
 fn torso_mesh<T: Player>(transform: &Transform) -> Mesh {
     let vec = transform.translation;
-	Mesh::from(bshape::Box::new(TORSO_WIDTH, vec.y, TORSO_THICKNESS))
+    Mesh::from(bshape::Box::new(TORSO_WIDTH, vec.y, TORSO_THICKNESS))
 }
 
 fn neck_collider<T: Player>(transform: &Transform) -> ColliderBundle {
@@ -188,7 +202,7 @@ fn leg_collider<T: Player>(transform: &Transform) -> ColliderBundle {
 fn collider_bundle<T: Player>(position: Vec3, shape: ColliderShape) -> ColliderBundle {
     let collision_tag = T::get_collision_tag();
     ColliderBundle {
-        position: position.into(),
+        position: to_rapier_vec(position).into(),
         shape: shape.into(),
         flags: ColliderFlags {
             collision_groups: InteractionGroups::new(

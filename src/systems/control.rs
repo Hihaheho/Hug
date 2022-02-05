@@ -55,13 +55,13 @@ pub fn keyboard_input(
 pub fn move_system<T: Player>(control: Res<HandControl<T>>, mut body: ResMut<PlayerBody<T>>) {
     if control.is_changed() {
         let (b, a, c) = control.left_sholder();
-        body.relative.get_mut::<UpperArmLeft>().rotation = Quat::from_ypr(a, b, c);
-        let (a, b, c) = control.right_sholder();
-        body.relative.get_mut::<UpperArmRight>().rotation = Quat::from_ypr(a, b, c);
-        let (a, b, c) = control.left_elbow();
-        body.relative.get_mut::<ForearmLeft>().rotation = Quat::from_ypr(a, b, c);
-        let (a, b, c) = control.right_elbow();
-        body.relative.get_mut::<ForearmRight>().rotation = Quat::from_ypr(a, b, c);
+        body.relative.get_mut::<UpperArmLeft>().rotation = Quat::from_rotation_ypr(a, b, c);
+        let (b, a, c) = control.right_sholder();
+        body.relative.get_mut::<UpperArmRight>().rotation = Quat::from_rotation_ypr(a, b, c);
+        let (b, a, c) = control.left_elbow();
+        body.relative.get_mut::<ForearmLeft>().rotation = Quat::from_rotation_ypr(a, b, c);
+        let (b, a, c) = control.right_elbow();
+        body.relative.get_mut::<ForearmRight>().rotation = Quat::from_rotation_ypr(a, b, c);
 
         body.absolute = body.relative.propagated();
     }
