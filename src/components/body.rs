@@ -7,7 +7,7 @@ use std::{
     ops::{Deref, DerefMut},
 };
 
-use bevy::prelude::*;
+use bevy::{ecs::component::Component, prelude::*};
 
 use super::player::Player;
 use part::*;
@@ -31,7 +31,7 @@ pub const FOREARM_LENGTH: f32 = 3.0 * RATIO;
 pub const UPPER_ARM_LENGTH: f32 = 3.0 * RATIO;
 pub const PELVIS_LENGTH: f32 = 1.5 * RATIO;
 
-#[derive(Component, Default)]
+#[derive(Default)]
 pub struct PlayerBody<T> {
     pub relative: Body,
     pub absolute: Body,

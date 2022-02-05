@@ -2,39 +2,39 @@ use bevy::prelude::*;
 
 use super::BodyPart;
 
-#[derive(Component, Default)]
+#[derive(Default)]
 pub struct Hip;
-#[derive(Component, Default)]
+#[derive(Default)]
 pub struct Spine;
-#[derive(Component, Default)]
+#[derive(Default)]
 pub struct Chest;
-#[derive(Component, Default)]
+#[derive(Default)]
 pub struct Neck;
-#[derive(Component, Default)]
+#[derive(Default)]
 pub struct Head;
-#[derive(Component, Default)]
+#[derive(Default)]
 pub struct UpperArmLeft;
-#[derive(Component, Default)]
+#[derive(Default)]
 pub struct ForearmLeft;
-#[derive(Component, Default)]
+#[derive(Default)]
 pub struct HandLeft;
-#[derive(Component, Default)]
+#[derive(Default)]
 pub struct UpperArmRight;
-#[derive(Component, Default)]
+#[derive(Default)]
 pub struct ForearmRight;
-#[derive(Component, Default)]
+#[derive(Default)]
 pub struct HandRight;
-#[derive(Component, Default)]
+#[derive(Default)]
 pub struct ThighLeft;
-#[derive(Component, Default)]
+#[derive(Default)]
 pub struct ShinLeft;
-#[derive(Component, Default)]
+#[derive(Default)]
 pub struct FootLeft;
-#[derive(Component, Default)]
+#[derive(Default)]
 pub struct ThighRight;
-#[derive(Component, Default)]
+#[derive(Default)]
 pub struct ShinRight;
-#[derive(Component, Default)]
+#[derive(Default)]
 pub struct FootRight;
 
 impl BodyPart for Hip {}

@@ -1,4 +1,4 @@
-use bevy::prelude::{*, shape as bshape};
+use bevy::{prelude::{*, shape as bshape}, ecs::component::Component};
 use bevy_rapier3d::prelude::*;
 
 use crate::components::{

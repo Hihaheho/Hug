@@ -5,6 +5,7 @@ use std::f32::consts::PI;
 
 use bevy::{
     audio::AudioPlugin,
+    ecs::component::Component,
     prelude::{shape as bevy_shape, *},
 };
 use bevy_rapier3d::{
@@ -32,13 +33,13 @@ pub enum HugSystems {
 
 #[bevy_main]
 fn main() {
-    // #[cfg(target_arch = "wasm32")]
-    // console_error_panic_hook::set_once();
+    #[cfg(target_arch = "wasm32")]
+    console_error_panic_hook::set_once();
 
     let mut app = App::new();
 
-    // #[cfg(target_arch = "wasm32")]
-    // app.add_system(systems::wasm::resize);
+    #[cfg(target_arch = "wasm32")]
+    app.add_system(systems::wasm::resize);
 
     app.add_plugins_with(DefaultPlugins, |plugins| plugins.disable::<AudioPlugin>())
         // .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
@@ -88,40 +89,49 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     // plane
-    commands
-        .spawn_bundle(PbrBundle {
-            mesh: meshes.add(Mesh::from(bevy_shape::Plane { size: 7.0 })),
-            material: materials.add(Color::rgb(0.1, 0.2, 0.3).into()),
-            ..Default::default()
-        })
-        .insert_bundle(RigidBodyBundle {
-            position: Vec3::new(0.0, -0.1, 0.0).into(),
-            body_type: RigidBodyType::Static.into(),
-            ..Default::default()
-        })
-        .insert_bundle(ColliderBundle {
-            shape: ColliderShape::cuboid(10.0, 0.1, 10.0).into(),
-            ..Default::default()
-        });
-
-    // wall left
     commands.spawn_bundle(PbrBundle {
-        transform: Transform::from_translation(Vec3::new(0.0, 0.1, -4.0))
-            .with_rotation(Quat::from_rotation_x(PI / 2.0)),
-        mesh: meshes.add(Mesh::from(bevy_shape::Plane { size: 15.0 })),
+        mesh: meshes.add(Mesh::from(bevy_shape::Plane { size: 7.0 })),
         material: materials.add(Color::rgb(0.1, 0.2, 0.3).into()),
         ..Default::default()
     });
+    // .insert_bundle(RigidBodyBundle {
+    //     position: Vec3::new(0.0, -0.1, 0.0).into(),
+    //     body_type: RigidBodyType::Static.into(),
+    //     ..Default::default()
+    // })
+    // .insert_bundle(ColliderBundle {
+    //     shape: ColliderShape::cuboid(10.0, 0.1, 10.0).into(),
+    //     ..Default::default()
+    // });
 
-    // wall right
-    commands.spawn_bundle(PbrBundle {
-        transform: Transform::from_translation(Vec3::new(4.0, 0.1, 0.0))
-            .with_rotation(Quat::from_rotation_z(PI / 2.0)),
-        mesh: meshes.add(Mesh::from(bevy_shape::Plane { size: 15.0 })),
-        material: materials.add(Color::rgb(0.1, 0.2, 0.3).into()),
-        ..Default::default()
-    });
+    // // wall left
+    // commands.spawn_bundle(PbrBundle {
+    //     transform: Transform::from_translation(Vec3::new(0.0, 0.1, -4.0))
+    //         .with_rotation(Quat::from_rotation_x(PI / 2.0)),
+    //     mesh: meshes.add(Mesh::from(bevy_shape::Plane { size: 15.0 })),
+    //     material: materials.add(Color::rgb(0.1, 0.2, 0.3).into()),
+    //     ..Default::default()
+    // });
 
+    // // wall right
+    // commands.spawn_bundle(PbrBundle {
+    //     transform: Transform::from_translation(Vec3::new(4.0, 0.1, 0.0))
+    //         .with_rotation(Quat::from_rotation_z(PI / 2.0)),
+    //     mesh: meshes.add(Mesh::from(bevy_shape::Plane { size: 15.0 })),
+    //     material: materials.add(Color::rgb(0.1, 0.2, 0.3).into()),
+    //     ..Default::default()
+    // });
+
+    // // light
+    // commands.spawn_bundle(PointLightBundle {
+    //     point_light: PointLight {
+    //         intensity: 800.0,
+    //         shadows_enabled: true,
+    //         ..Default::default()
+    //     },
+    //     transform: Transform::from_xyz(2.0, 3.0, 2.0),
+    //     ..Default::default()
+    // });
     // light
     commands.spawn_bundle(PointLightBundle {
         point_light: PointLight {
@@ -129,19 +139,9 @@ fn setup(
             shadows_enabled: true,
             ..Default::default()
         },
-        transform: Transform::from_xyz(2.0, 3.0, 2.0),
+        transform: Transform::from_xyz(-2.0, 3.0, 2.0),
         ..Default::default()
     });
-    // light
-    // commands.spawn_bundle(PointLightBundle {
-    //     point_light: PointLight {
-    //         intensity: 800.0,
-    //         shadows_enabled: true,
-    //         ..Default::default()
-    //     },
-    //     transform: Transform::from_xyz(-2.0, 3.0, 2.0),
-    //     ..Default::default()
-    // });
 
     // camera
     commands.spawn_bundle(PerspectiveCameraBundle {
@@ -156,10 +156,10 @@ fn angular_spring_system<T: Player, Parent: Component, Child: Component>(
     joint: Query<(&JointHandleComponent, &JointMotorParams), (With<Joint<Parent, Child>>, With<T>)>,
     mut joints: ResMut<ImpulseJointSet>,
 ) {
-    if let Ok((joint_handle, JointMotorParams { stiffness, damping })) = joint.get_single() {
+    if let Ok((joint_handle, JointMotorParams { stiffness, damping })) = joint.single_mut() {
         let joint = joints.get_mut(joint_handle.handle()).unwrap();
         let transform = body.relative.get::<Parent>();
-        let angles = transform.rotation.to_euler(EulerRot::XYZ);
+        let angles = transform.rotation.to_ypr();
         joint.data = joint
             .data
             .motor_position(JointAxis::AngX, angles.0, *stiffness, *damping)

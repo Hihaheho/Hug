@@ -15,7 +15,6 @@ impl Into<u32> for CollisionTag {
     }
 }
 
-#[derive(Component)]
 pub struct Joint<A, B>(PhantomData<(A, B)>);
 
 impl<A, B> Default for Joint<A, B> {
@@ -24,7 +23,6 @@ impl<A, B> Default for Joint<A, B> {
     }
 }
 
-#[derive(Component)]
 pub struct JointMotorParams {
     pub stiffness: f32,
     pub damping: f32,
