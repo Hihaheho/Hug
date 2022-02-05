@@ -25,3 +25,4 @@ bevy_webgl2 = { version = "0.5", optional = true }
 
 # [patch.crates-io]
 # bevy = { git = "https://github.com/bevyengine/bevy", rev = "3431335ee9a2e3cfda81485d8080f85c0bc50461" }
+winit = { git = "https://github.com/ryo33/winit", rev = "08a0bd525a4b138657a7cc54d4ec73fa6c3aee70", features = ["web-sys"] }
