@@ -39,7 +39,7 @@ fn main() {
 
     app.add_plugins(DefaultPlugins)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
-        .add_plugin(RapierRenderPlugin)
+        // .add_plugin(RapierRenderPlugin)
         .add_startup_system(setup.system())
         .add_startup_system(setup_player.system())
         .add_system_set(
@@ -91,8 +91,6 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut integration: ResMut<IntegrationParameters>,
 ) {
-    integration.max_stabilization_iterations = 3;
-    integration.max_velocity_iterations = 6;
     // plane
     commands
         .spawn_bundle(PbrBundle {

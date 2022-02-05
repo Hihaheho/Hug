@@ -94,6 +94,50 @@ fn create_player<T: Player + Copy>(
     insert_mesh::<T, Spine>(commands, meshes, m.clone(), &body, spine, torso_mesh::<T>);
     insert_mesh::<T, Chest>(commands, meshes, m.clone(), &body, chest, torso_mesh::<T>);
     insert_mesh::<T, Neck>(commands, meshes, m.clone(), &body, neck, neck_mesh::<T>);
+    insert_mesh::<T, Head>(commands, meshes, m.clone(), &body, head, head_mesh::<T>);
+    insert_mesh::<T, ForearmLeft>(
+        commands,
+        meshes,
+        m.clone(),
+        &body,
+        forearm_left,
+        arm_mesh::<T>,
+    );
+    insert_mesh::<T, ForearmRight>(
+        commands,
+        meshes,
+        m.clone(),
+        &body,
+        forearm_right,
+        arm_mesh::<T>,
+    );
+    insert_mesh::<T, HandLeft>(commands, meshes, m.clone(), &body, hand_left, arm_mesh::<T>);
+    insert_mesh::<T, HandRight>(
+        commands,
+        meshes,
+        m.clone(),
+        &body,
+        hand_right,
+        arm_mesh::<T>,
+    );
+    insert_mesh::<T, ShinLeft>(commands, meshes, m.clone(), &body, shin_left, leg_mesh::<T>);
+    insert_mesh::<T, ShinRight>(
+        commands,
+        meshes,
+        m.clone(),
+        &body,
+        shin_right,
+        leg_mesh::<T>,
+    );
+    insert_mesh::<T, FootLeft>(commands, meshes, m.clone(), &body, foot_left, leg_mesh::<T>);
+    insert_mesh::<T, FootRight>(
+        commands,
+        meshes,
+        m.clone(),
+        &body,
+        foot_right,
+        leg_mesh::<T>,
+    );
 
     // PlayerBody
     commands.insert_resource(body);
@@ -214,6 +258,11 @@ fn head_collider<T: Player>(transform: &Transform) -> ColliderBundle {
     )
 }
 
+fn head_mesh<T: Player>(transform: &Transform) -> Mesh {
+    let vec = transform.translation;
+    Mesh::from(bshape::Box::new(HEAD_WIDTH, vec.y, HEAD_THICKNESS))
+}
+
 fn arm_collider<T: Player>(transform: &Transform) -> ColliderBundle {
     let vec = transform.translation;
     collider_bundle::<T>(
@@ -222,12 +271,30 @@ fn arm_collider<T: Player>(transform: &Transform) -> ColliderBundle {
     )
 }
 
+fn arm_mesh<T: Player>(transform: &Transform) -> Mesh {
+    let vec = transform.translation;
+    Mesh::from(bshape::Box::new(
+        vec.x.abs(),
+        ARM_RADIUS * 2.0,
+        ARM_RADIUS * 2.0,
+    ))
+}
+
 fn leg_collider<T: Player>(transform: &Transform) -> ColliderBundle {
     let vec = transform.translation;
     collider_bundle::<T>(
         (-vec / 2.0).into(),
         ColliderShape::cuboid(LEG_RADIUS, vec.y.abs() / 2.0, LEG_RADIUS),
     )
+}
+
+fn leg_mesh<T: Player>(transform: &Transform) -> Mesh {
+    let vec = transform.translation;
+    Mesh::from(bshape::Box::new(
+        LEG_RADIUS * 2.0,
+        vec.y.abs(),
+        LEG_RADIUS * 2.0,
+    ))
 }
 
 fn collider_bundle<T: Player>(position: Vec3, shape: ColliderShape) -> ColliderBundle {
