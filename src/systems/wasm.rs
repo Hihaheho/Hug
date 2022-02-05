@@ -1,13 +1,14 @@
 use bevy::prelude::*;
 
+const WIDTH: f32 = 600.0;
+
 pub fn resize(mut windows: ResMut<Windows>) {
     if windows.is_changed() {
         let js_window = web_sys::window().unwrap();
         let window = windows.get_primary_mut().unwrap();
-        window.set_resolution(
-            js_window.inner_width().unwrap().as_f64().unwrap() as f32,
-            js_window.inner_height().unwrap().as_f64().unwrap() as f32,
-        );
+        let width = js_window.inner_width().unwrap().as_f64().unwrap() as f32;
+        let height = js_window.inner_height().unwrap().as_f64().unwrap() as f32;
+        window.set_resolution(width * (WIDTH / width), height * (WIDTH / width));
     }
 }
 
