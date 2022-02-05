@@ -11,9 +11,9 @@ pub fn touch_input(
     touches: Res<Touches>,
     windows: Res<Windows>,
 ) {
-    println!("touch");
     if let Some(window) = windows.get_primary() {
-        println!("{:?}", *touches);
+        #[cfg(target_arch = "wasm32")]
+        web_sys::console::log_1(&(&format!("{:?}", *touches).into()));
         for touch in touches.iter() {
             if touch.start_position().x < window.width() / 2.0 {
                 control.add_left(touch.delta());
