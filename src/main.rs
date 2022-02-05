@@ -38,7 +38,7 @@ fn main() {
     let mut app = App::build();
 
     let mut win = WindowDescriptor::default();
-    // win.scale_factor_override = Some(0.25);
+    win.scale_factor_override = Some(0.5);
 
     app.insert_resource(win)
         .add_plugins(DefaultPlugins)
