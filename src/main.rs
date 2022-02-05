@@ -37,7 +37,11 @@ fn main() {
 
     let mut app = App::build();
 
-    app.add_plugins(DefaultPlugins)
+    let mut win = WindowDescriptor::default();
+    win.scale_factor_override = Some(0.25);
+
+    app.insert_resource(win)
+        .add_plugins(DefaultPlugins)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
         // .add_plugin(RapierRenderPlugin)
         .add_startup_system(setup.system())
