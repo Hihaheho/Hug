@@ -12,6 +12,7 @@ pub fn touch_input(
     windows: Res<Windows>,
 ) {
     if let Some(window) = windows.get_primary() {
+        println!("{:?}", *touches);
         for touch in touches.iter() {
             if touch.start_position().x < window.width() / 2.0 {
                 control.add_left(touch.delta());
