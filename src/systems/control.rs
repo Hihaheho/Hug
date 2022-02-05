@@ -11,6 +11,7 @@ pub fn touch_input(
     touches: Res<Touches>,
     windows: Res<Windows>,
 ) {
+    println!("touch");
     if let Some(window) = windows.get_primary() {
         println!("{:?}", *touches);
         for touch in touches.iter() {
