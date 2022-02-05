@@ -85,13 +85,19 @@ fn create_player<T: Player + Copy>(commands: &mut Commands, z: f32) {
     commands.insert_resource(body);
 }
 
-// fn insert_mesh<T: Player, P: BodyPart>(commands: &mut Commands, body: &PlayerBody<T>, part: Entity, builder: fn(&Transform) -> Mesh) {
-// 	let transform = body.relative.get::<P>();
-// 	commands.entity(part).insert_bundle(PbrBundle {
-// 		mesh: builder(transform),
-// 		..Default::default()
-// 	});
-// }
+fn insert_mesh<T: Player, P: BodyPart>(
+    commands: &mut Commands,
+    meshes: &mut Assets<Mesh>,
+    body: &PlayerBody<T>,
+    part: Entity,
+    builder: fn(&Transform) -> Mesh,
+) {
+    let transform = body.relative.get::<P>();
+    commands.entity(part).insert_bundle(PbrBundle {
+        mesh: meshes.add(builder(transform)),
+        ..Default::default()
+    });
+}
 
 fn to_rapier_vec(vec: Vec3) -> Vector3<f32> {
     vector!(vec.x, vec.y, vec.z)

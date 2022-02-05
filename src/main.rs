@@ -4,7 +4,6 @@ mod systems;
 use std::f32::consts::PI;
 
 use bevy::{
-    audio::AudioPlugin,
     ecs::component::Component,
     prelude::{shape as bevy_shape, *},
 };
@@ -38,10 +37,7 @@ fn main() {
 
     let mut app = App::build();
 
-    #[cfg(target_arch = "wasm32")]
-    app.add_system(systems::wasm::resize);
-
-    app.add_plugins_with(DefaultPlugins, |plugins| plugins.disable::<AudioPlugin>())
+    app.add_plugins(DefaultPlugins)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugin(RapierRenderPlugin)
         .add_startup_system(setup.system())
@@ -79,6 +75,12 @@ fn main() {
         );
 
     // bevy_mod_debugdump::print_schedule(&mut app);
+
+    #[cfg(target_arch = "wasm32")]
+    app.add_plugin(bevy_webgl2::WebGL2Plugin)
+        .insert_resource(systems::wasm::Message::NotDeleted)
+        .add_system(systems::wasm::resize.system())
+        .add_system(systems::wasm::remove_message.system());
 
     app.run();
 }
