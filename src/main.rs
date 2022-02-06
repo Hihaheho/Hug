@@ -38,7 +38,15 @@ fn main() {
     let mut app = App::build();
 
     let mut win = WindowDescriptor::default();
-    win.scale_factor_override = Some(0.7);
+    #[cfg(target_arch = "wasm32")]
+    {
+        const WIDTH: f32 = 400.0;
+        let js_window = web_sys::window().unwrap();
+        let width = js_window.inner_width().unwrap().as_f64().unwrap() as f32;
+        let height = js_window.inner_height().unwrap().as_f64().unwrap() as f32;
+        let ratio = WIDTH / width;
+        win.scale_factor_override = Some(ratio as f64);
+    }
 
     app.insert_resource(win)
         .add_plugins(DefaultPlugins)

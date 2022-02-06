@@ -7,7 +7,10 @@ pub fn resize(mut windows: ResMut<Windows>) {
     let window = windows.get_primary_mut().unwrap();
     let width = js_window.inner_width().unwrap().as_f64().unwrap() as f32;
     let height = js_window.inner_height().unwrap().as_f64().unwrap() as f32;
-    window.set_resolution(width * (WIDTH / width), height * (WIDTH / width));
+    let ratio = WIDTH / width;
+    if window.requested_width() != width || window.requested_height() != height {
+        window.set_resolution(width, height);
+    }
 }
 
 #[derive(PartialEq)]
