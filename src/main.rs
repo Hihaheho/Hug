@@ -40,7 +40,7 @@ fn main() {
     let mut win = WindowDescriptor::default();
     #[cfg(target_arch = "wasm32")]
     {
-        const WIDTH: f32 = 400.0;
+        const WIDTH: f32 = 300.0;
         let js_window = web_sys::window().unwrap();
         let width = js_window.inner_width().unwrap().as_f64().unwrap() as f32;
         let height = js_window.inner_height().unwrap().as_f64().unwrap() as f32;

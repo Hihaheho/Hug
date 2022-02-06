@@ -10,16 +10,17 @@ pub fn touch_input(
     mut control: ResMut<HandControl<Player1>>,
     touches: Res<Touches>,
     windows: Res<Windows>,
+    desc: Res<WindowDescriptor>,
 ) {
-    if let Some(window) = windows.get_primary() {
-        for touch in touches.iter() {
-            let delta = touch.delta() / (window.width() / 2.0);
-            let delta = Vec2::new(delta.x, -delta.y);
-            if touch.start_position().x < window.width() / 2.0 {
-                control.add_left(delta);
-            } else {
-                control.add_right(delta);
-            }
+    let scale = desc.scale_factor_override.unwrap() as f32;
+    let width = windows.get_primary().unwrap().requested_width() * scale;
+    for touch in touches.iter() {
+        let delta = touch.delta();
+        let delta = Vec2::new(delta.x / (width / 5.0), -delta.y / (width / 2.0));
+        if touch.start_position().x < width / 2.0 {
+            control.add_left(delta);
+        } else {
+            control.add_right(delta);
         }
     }
 }
