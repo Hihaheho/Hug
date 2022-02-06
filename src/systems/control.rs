@@ -12,13 +12,13 @@ pub fn touch_input(
     windows: Res<Windows>,
 ) {
     if let Some(window) = windows.get_primary() {
-        #[cfg(target_arch = "wasm32")]
-        web_sys::console::log_1(&(&format!("{:?}", *touches).into()));
         for touch in touches.iter() {
+            let delta = touch.delta() / (window.width() / 2.0);
+            let delta = Vec2::new(delta.x, -delta.y);
             if touch.start_position().x < window.width() / 2.0 {
-                control.add_left(touch.delta());
+                control.add_left(delta);
             } else {
-                control.add_right(touch.delta());
+                control.add_right(delta);
             }
         }
     }
