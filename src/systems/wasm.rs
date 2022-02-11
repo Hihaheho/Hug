@@ -20,7 +20,7 @@ pub enum Message {
 }
 
 pub fn remove_message(time: Res<Time>, mut message: ResMut<Message>) {
-    if time.seconds_since_startup() > 1.5 && *message == Message::NotDeleted {
+    if time.seconds_since_startup() > 0.3 && *message == Message::NotDeleted {
         *message = Message::Deleted;
         web_sys::window()
             .unwrap()

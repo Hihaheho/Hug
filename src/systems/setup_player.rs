@@ -19,8 +19,20 @@ pub fn setup_player(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    create_player::<Player1>(&mut commands, &mut meshes, &mut materials, 0.2);
-    create_player::<Player2>(&mut commands, &mut meshes, &mut materials, -0.2);
+    create_player::<Player1>(
+        &mut commands,
+        &mut meshes,
+        &mut materials,
+        0.2,
+        Color::rgb(0.6, 0.4, 0.1),
+    );
+    create_player::<Player2>(
+        &mut commands,
+        &mut meshes,
+        &mut materials,
+        -0.2,
+        Color::rgb(0.2, 0.2, 0.7),
+    );
 }
 
 fn create_player<T: Player + Copy>(
@@ -28,6 +40,7 @@ fn create_player<T: Player + Copy>(
     meshes: &mut Assets<Mesh>,
     materials: &mut Assets<StandardMaterial>,
     z: f32,
+    color: Color,
 ) {
     let mut body = Body::default();
     body.get_mut::<Hip>().translation.z = z;
@@ -90,7 +103,7 @@ fn create_player<T: Player + Copy>(
         .spawn()
         .insert(JointBuilderComponent::new(joint, ground, hip));
 
-    let m = materials.add(Color::rgb(0.7, 0.3, 0.5).into());
+    let m = materials.add(color.into());
     insert_mesh::<T, Spine>(commands, meshes, m.clone(), &body, spine, torso_mesh::<T>);
     insert_mesh::<T, Chest>(commands, meshes, m.clone(), &body, chest, torso_mesh::<T>);
     insert_mesh::<T, Neck>(commands, meshes, m.clone(), &body, neck, neck_mesh::<T>);

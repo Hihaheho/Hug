@@ -1,4 +1,5 @@
 mod components;
+mod plugins;
 mod systems;
 
 use std::f32::consts::PI;
@@ -17,6 +18,7 @@ use components::{
     physics::{CollisionTag, Joint, JointMotorParams},
     player::{Player, Player1, Player2},
 };
+use plugins::networking::NetworkPlugin;
 use systems::{
     active_ragdoll::{hand_baloon_system, head_baloon_system, hip_baloon_system},
     control::{keyboard_input, move_system, touch_input},
@@ -38,6 +40,7 @@ fn main() {
     let mut app = App::build();
 
     let mut win = WindowDescriptor::default();
+    win.scale_factor_override = Some(1.0);
     #[cfg(target_arch = "wasm32")]
     {
         const WIDTH: f32 = 300.0;
@@ -86,6 +89,9 @@ fn main() {
                 .with_system(angular_spring_system::<Player1, ShinRight, FootRight>.system()),
         );
 
+    #[cfg(target_arch = "wasm32")]
+    app.add_plugin(NetworkPlugin);
+
     // bevy_mod_debugdump::print_schedule(&mut app);
 
     #[cfg(target_arch = "wasm32")]
@@ -103,11 +109,12 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut integration: ResMut<IntegrationParameters>,
 ) {
+    let wall_material = materials.add(Color::rgb(0.9, 0.7, 0.8).into());
     // plane
     commands
         .spawn_bundle(PbrBundle {
             mesh: meshes.add(Mesh::from(bevy_shape::Plane { size: 7.0 })),
-            material: materials.add(Color::rgb(0.1, 0.2, 0.3).into()),
+            material: wall_material.clone(),
             ..Default::default()
         })
         .insert_bundle(RigidBodyBundle {
@@ -125,7 +132,7 @@ fn setup(
         transform: Transform::from_translation(Vec3::new(0.0, 0.1, -4.0))
             * Transform::from_rotation(Quat::from_rotation_x(PI / 2.0)),
         mesh: meshes.add(Mesh::from(bevy_shape::Plane { size: 15.0 })),
-        material: materials.add(Color::rgb(0.1, 0.2, 0.3).into()),
+        material: wall_material.clone(),
         ..Default::default()
     });
 
@@ -134,7 +141,7 @@ fn setup(
         transform: Transform::from_translation(Vec3::new(4.0, 0.1, 0.0))
             * Transform::from_rotation(Quat::from_rotation_z(PI / 2.0)),
         mesh: meshes.add(Mesh::from(bevy_shape::Plane { size: 15.0 })),
-        material: materials.add(Color::rgb(0.1, 0.2, 0.3).into()),
+        material: wall_material.clone(),
         ..Default::default()
     });
 
@@ -169,7 +176,7 @@ fn setup(
 
     // camera
     commands.spawn_bundle(PerspectiveCameraBundle {
-        transform: Transform::from_xyz(-1.5, 1.5, 2.0)
+        transform: Transform::from_xyz(-2.0, 1.5, 2.5)
             .looking_at(Vec3::new(0.0, 1.5, 0.0), Vec3::Y),
         ..Default::default()
     });

@@ -7,10 +7,24 @@
         margin: 0px;
         touch-action: none;
       }
+      body {
+        z-index: 1;
+      }
 			canvas {
+        position: absolute;
 				width: 100% !important;
 				height: 100% !important;
+        z-index: 2;
 			}
+      #buttons {
+        position: absolute;
+        z-index: 3;
+        width: 100%;
+      }
+      button {
+        font-size: 2em;
+        width: 45%;
+      }
     </style>
   </head>
   <body>
@@ -18,6 +32,18 @@
 			<p>If you're using Safari on iPhone, please google how to enable WebGL2.0 on iPhone, or try Google Chrome.</p>
 			<p>iPhoneのSafariをお使いの方は、「iPhoneでWebGL2.0を有効にする方法」でググっていただくか、Google Chromeをお試しください。</p>
 		</div>
+    <script>
+      function random() {
+        window.localStorage.setItem("random", true);
+      }
+      function room() {
+        window.localStorage.setItem("room", true);
+      }
+    </script>
+    <div id="buttons">
+      <button id="random" onclick="random()">Random</button>
+      <button id="room" onclick="room()">New Room</button>
+    </div>
   </body>
   <script type="module">
     import init from './hug.js'
