@@ -2,7 +2,7 @@ use std::{f32::consts::PI, marker::PhantomData};
 
 use bevy::prelude::*;
 
-use super::player::Player;
+use super::player::{Player, Player1, Player2};
 
 const MIN: f32 = 0.0;
 const MAX: f32 = 1.0;
@@ -29,6 +29,22 @@ const SHOULDER_Z_MIN: f32 = -PI * 8.0 / 9.0 / 4.0;
 const SHOULDER_Z_MAX: f32 = PI * 8.0 / 9.0 / 4.0;
 
 impl<T: Player> HandControl<T> {
+    pub fn left(&self) -> &Vec2 {
+        &self.left
+    }
+
+    pub fn right(&self) -> &Vec2 {
+        &self.right
+    }
+
+    pub fn set_left(&mut self, left: Vec2) {
+        self.left = left;
+    }
+
+    pub fn set_right(&mut self, right: Vec2) {
+        self.right = right;
+    }
+
     pub fn add_left(&mut self, other: Vec2) {
         self.left += other;
         self.left.x = self.left.x.min(MAX).max(MIN);
@@ -40,7 +56,9 @@ impl<T: Player> HandControl<T> {
         self.right.x = self.right.x.min(MAX).max(MIN);
         self.right.y = self.right.y.min(MAX).max(MIN);
     }
+}
 
+impl HandControl<Player1> {
     pub fn right_sholder(&self) -> (f32, f32, f32) {
         let x = 0.0;
         let y = lerp(0.0, SHOULDER_Y_MAX, 1.0 - self.right.x);
@@ -52,6 +70,36 @@ impl<T: Player> HandControl<T> {
         let x = 0.0;
         let y = lerp(0.0, -SHOULDER_Y_MAX, self.left.x);
         let z = lerp(-SHOULDER_Z_MIN, -SHOULDER_Z_MAX, self.left.y);
+        (x, y, z)
+    }
+
+    pub fn right_elbow(&self) -> (f32, f32, f32) {
+        let x = 0.0;
+        let y = lerp(0.0, ELBOW_Y_MAX, (1.0 - self.right.x).powi(2));
+        let z = 0.0;
+        (x, y, z)
+    }
+
+    pub fn left_elbow(&self) -> (f32, f32, f32) {
+        let x = 0.0;
+        let y = lerp(0.0, -ELBOW_Y_MAX, self.left.x.powi(2));
+        let z = 0.0;
+        (x, y, z)
+    }
+}
+
+impl HandControl<Player2> {
+    pub fn right_sholder(&self) -> (f32, f32, f32) {
+        let x = 0.0;
+        let y = lerp(0.0, SHOULDER_Y_MAX, 1.0 - self.right.x);
+        let z = lerp(SHOULDER_Z_MAX, SHOULDER_Z_MIN, self.right.y);
+        (x, y, z)
+    }
+
+    pub fn left_sholder(&self) -> (f32, f32, f32) {
+        let x = 0.0;
+        let y = lerp(0.0, -SHOULDER_Y_MAX, self.left.x);
+        let z = lerp(-SHOULDER_Z_MAX, -SHOULDER_Z_MIN, self.left.y);
         (x, y, z)
     }
 

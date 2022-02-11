@@ -1,3 +1,5 @@
+use std::f32::consts::PI;
+
 use bevy::{
     ecs::component::Component,
     prelude::{shape as bshape, *},
@@ -23,14 +25,17 @@ pub fn setup_player(
         &mut commands,
         &mut meshes,
         &mut materials,
-        0.2,
+        Body::player1(),
+        Transform::from_translation(Vec3::new(0.0, 0.0, 0.2)),
         Color::rgb(0.6, 0.4, 0.1),
     );
+
     create_player::<Player2>(
         &mut commands,
         &mut meshes,
         &mut materials,
-        -0.2,
+        Body::player2(),
+        Transform::from_translation(Vec3::new(0.0, 0.0, -0.2)),
         Color::rgb(0.2, 0.2, 0.7),
     );
 }
@@ -39,17 +44,14 @@ fn create_player<T: Player + Copy>(
     commands: &mut Commands,
     meshes: &mut Assets<Mesh>,
     materials: &mut Assets<StandardMaterial>,
-    z: f32,
+    mut body: Body,
+    transform: Transform,
     color: Color,
 ) {
-    let mut body = Body::default();
-    body.get_mut::<Hip>().translation.z = z;
-    body.get_mut::<Hip>().translation.y += 0.1;
-    let propagated = body.propagated();
+    *body.get_mut::<Hip>() = transform * *body.get::<Hip>();
 
-    let body = PlayerBody::<T>::new(body.clone(), propagated.clone());
-
-    commands.insert_resource(HandControl::<T>::default());
+    let body = PlayerBody::<T>::new(body.clone(), body.propagated());
+    let control = HandControl::<T>::default();
 
     let hip = spawn_body_part::<T, Hip>(commands, &body, small_collider::<T>);
     let spine = spawn_body_part::<T, Spine>(commands, &body, torso_collider::<T>);
@@ -154,6 +156,7 @@ fn create_player<T: Player + Copy>(
 
     // PlayerBody
     commands.insert_resource(body);
+    commands.insert_resource(control);
 }
 
 fn insert_mesh<T: Player, P: BodyPart>(

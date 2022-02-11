@@ -17,11 +17,13 @@ use components::{
     body::{part::*, PlayerBody},
     physics::{CollisionTag, Joint, JointMotorParams},
     player::{Player, Player1, Player2},
+    state::AppState,
 };
+#[cfg(target_arch = "wasm32")]
 use plugins::networking::NetworkPlugin;
 use systems::{
     active_ragdoll::{hand_baloon_system, head_baloon_system, hip_baloon_system},
-    control::{keyboard_input, move_system, touch_input},
+    control::{keyboard_input, move_system, move_system2, touch_input},
     setup_player::setup_player,
 };
 
@@ -57,6 +59,7 @@ fn main() {
         // .add_plugin(RapierRenderPlugin)
         .add_startup_system(setup.system())
         .add_startup_system(setup_player.system())
+        .add_state(AppState::Alone)
         .add_system_set(
             SystemSet::new()
                 .label(HugSystems::InputSystem)
@@ -67,8 +70,8 @@ fn main() {
             SystemSet::new()
                 .label(HugSystems::MoveSystem)
                 .after(HugSystems::InputSystem)
-                .with_system(move_system::<Player1>.system())
-                .with_system(move_system::<Player2>.system()),
+                .with_system(move_system.system())
+                .with_system(move_system2.system()),
         )
         .add_system_set(
             SystemSet::new()
@@ -86,7 +89,15 @@ fn main() {
                 .with_system(angular_spring_system::<Player1, ThighLeft, ShinLeft>.system())
                 .with_system(angular_spring_system::<Player1, ShinLeft, FootLeft>.system())
                 .with_system(angular_spring_system::<Player1, ThighRight, ShinRight>.system())
-                .with_system(angular_spring_system::<Player1, ShinRight, FootRight>.system()),
+                .with_system(angular_spring_system::<Player1, ShinRight, FootRight>.system())
+                .with_system(angular_spring_system::<Player2, UpperArmLeft, ForearmLeft>.system())
+                .with_system(angular_spring_system::<Player2, ForearmLeft, HandLeft>.system())
+                .with_system(angular_spring_system::<Player2, UpperArmRight, ForearmRight>.system())
+                .with_system(angular_spring_system::<Player2, ForearmRight, HandRight>.system())
+                .with_system(angular_spring_system::<Player2, ThighLeft, ShinLeft>.system())
+                .with_system(angular_spring_system::<Player2, ShinLeft, FootLeft>.system())
+                .with_system(angular_spring_system::<Player2, ThighRight, ShinRight>.system())
+                .with_system(angular_spring_system::<Player2, ShinRight, FootRight>.system()),
         );
 
     #[cfg(target_arch = "wasm32")]
@@ -98,7 +109,8 @@ fn main() {
     app.add_plugin(bevy_webgl2::WebGL2Plugin)
         .insert_resource(systems::wasm::Message::NotDeleted)
         .add_system(systems::wasm::resize.system())
-        .add_system(systems::wasm::remove_message.system());
+        .add_system(systems::wasm::remove_message.system())
+        .add_system(systems::ui::update_state.system());
 
     app.run();
 }
@@ -109,7 +121,9 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut integration: ResMut<IntegrationParameters>,
 ) {
-    let wall_material = materials.add(Color::rgb(0.9, 0.7, 0.8).into());
+    // integration.dt = 0.000000;
+
+    let wall_material = materials.add(Color::rgb(0.78, 0.73, 0.75).into());
     // plane
     commands
         .spawn_bundle(PbrBundle {

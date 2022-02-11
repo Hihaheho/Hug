@@ -1,7 +1,10 @@
 pub mod active_ragdoll;
 pub mod control;
 pub mod joint_display;
+#[cfg(target_arch = "wasm32")]
 pub mod networking;
 pub mod setup_player;
+#[cfg(target_arch = "wasm32")]
+pub mod ui;
 #[cfg(target_arch = "wasm32")]
 pub mod wasm;

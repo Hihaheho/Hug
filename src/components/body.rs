@@ -31,7 +31,6 @@ pub const FOREARM_LENGTH: f32 = 3.0 * RATIO;
 pub const UPPER_ARM_LENGTH: f32 = 3.0 * RATIO;
 pub const PELVIS_LENGTH: f32 = 1.5 * RATIO;
 
-#[derive(Default)]
 pub struct PlayerBody<T> {
     pub relative: Body,
     pub absolute: Body,
@@ -51,8 +50,14 @@ impl<T: Player> PlayerBody<T> {
 #[derive(Clone)]
 pub struct Body(HashMap<TypeId, Transform>);
 
-impl Default for Body {
-    fn default() -> Self {
+impl Body {
+    pub fn player1() -> Self {
+        Self::player(1.0)
+    }
+    pub fn player2() -> Self {
+        Self::player(-1.0)
+    }
+    fn player(x: f32) -> Self {
         let mut body = Self(HashMap::new());
         body.0
             .insert(Hip.type_id(), Transform::from_xyz(0.0, 7. * RATIO, 0.0));
@@ -66,31 +71,31 @@ impl Default for Body {
             .insert(Head.type_id(), Transform::from_xyz(0.0, 3. * RATIO, 0.0));
         body.0.insert(
             UpperArmLeft.type_id(),
-            Transform::from_xyz(-SHOULDER_LENGTH, 0.0, 0.0),
+            Transform::from_xyz(x * -SHOULDER_LENGTH, 0.0, 0.0),
         );
         body.0.insert(
             ForearmLeft.type_id(),
-            Transform::from_xyz(-UPPER_ARM_LENGTH, 0.0, 0.0),
+            Transform::from_xyz(x * -UPPER_ARM_LENGTH, 0.0, 0.0),
         );
         body.0.insert(
             HandLeft.type_id(),
-            Transform::from_xyz(-FOREARM_LENGTH, 0.0, 0.0),
+            Transform::from_xyz(x * -FOREARM_LENGTH, 0.0, 0.0),
         );
         body.0.insert(
             UpperArmRight.type_id(),
-            Transform::from_xyz(SHOULDER_LENGTH, 0.0, 0.0),
+            Transform::from_xyz(x * SHOULDER_LENGTH, 0.0, 0.0),
         );
         body.0.insert(
             ForearmRight.type_id(),
-            Transform::from_xyz(UPPER_ARM_LENGTH, 0.0, 0.0),
+            Transform::from_xyz(x * UPPER_ARM_LENGTH, 0.0, 0.0),
         );
         body.0.insert(
             HandRight.type_id(),
-            Transform::from_xyz(FOREARM_LENGTH, 0.0, 0.0),
+            Transform::from_xyz(x * FOREARM_LENGTH, 0.0, 0.0),
         );
         body.0.insert(
             ThighLeft.type_id(),
-            Transform::from_xyz(-PELVIS_LENGTH, 0.0, 0.0),
+            Transform::from_xyz(x * -PELVIS_LENGTH, 0.0, 0.0),
         );
         body.0.insert(
             ShinLeft.type_id(),
@@ -102,7 +107,7 @@ impl Default for Body {
         );
         body.0.insert(
             ThighRight.type_id(),
-            Transform::from_xyz(PELVIS_LENGTH, 0.0, 0.0),
+            Transform::from_xyz(x * PELVIS_LENGTH, 0.0, 0.0),
         );
         body.0.insert(
             ShinRight.type_id(),
