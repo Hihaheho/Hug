@@ -19,7 +19,7 @@ impl Plugin for NetworkPlugin {
         app.insert_resource(Sender(Vec::new()))
             .insert_resource(Receiver(Vec::new()))
             .insert_resource(PushTimer(Timer::from_seconds(0.1, true)))
-            .insert_resource(SyncTimer(Timer::from_seconds(0.5, true)))
+            .insert_resource(SyncTimer(Timer::from_seconds(0.1, true)))
             .insert_resource(IsPrimary::No)
             .add_startup_system(join_room.system())
             .add_system_to_stage(CoreStage::PreUpdate, sender.system())
