@@ -4,7 +4,6 @@ use std::{
     any::{Any, TypeId},
     collections::HashMap,
     marker::PhantomData,
-    ops::{Deref, DerefMut},
 };
 
 use bevy::{ecs::component::Component, prelude::*};

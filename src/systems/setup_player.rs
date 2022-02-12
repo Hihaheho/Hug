@@ -1,13 +1,8 @@
-use std::f32::consts::PI;
-
 use bevy::{
     ecs::component::Component,
     prelude::{shape as bshape, *},
 };
-use bevy_rapier3d::{
-    na::{OPoint, Vector3},
-    prelude::*,
-};
+use bevy_rapier3d::{na::Vector3, prelude::*};
 
 use crate::components::{
     body::{part::*, *},

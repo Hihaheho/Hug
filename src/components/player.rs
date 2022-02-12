@@ -1,4 +1,4 @@
-use bevy::{ecs::component::Component, prelude::*};
+use bevy::ecs::component::Component;
 
 use super::physics::CollisionTag;
 

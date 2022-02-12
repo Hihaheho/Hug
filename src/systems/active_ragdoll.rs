@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_rapier3d::{na::Vector3, prelude::*};
+use bevy_rapier3d::{prelude::*};
 
 use crate::components::{
     body::{part::*, PlayerBody},

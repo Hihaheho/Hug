@@ -1,9 +1,11 @@
-use bevy::prelude::*;
+use bevy::{ecs::component::Component, prelude::*};
+use bevy_rapier3d::{physics::JointHandleComponent, prelude::*};
 
 use crate::{
     components::{
         body::{part::*, PlayerBody},
         control::HandControl,
+        physics::{Joint, JointMotorParams},
         player::{Player, Player1, Player2},
     },
     WIDTH,
@@ -87,5 +89,32 @@ pub fn move_system2(control: Res<HandControl<Player2>>, mut body: ResMut<PlayerB
         body.relative.get_mut::<ForearmRight>().rotation = Quat::from_rotation_ypr(a, b, c);
 
         body.absolute = body.relative.propagated();
+    }
+}
+
+pub fn angular_spring_system<T: Player, Parent: Component, Child: Component>(
+    body: Res<PlayerBody<T>>,
+    joint: Query<(&JointHandleComponent, &JointMotorParams), (With<Joint<Parent, Child>>, With<T>)>,
+    mut joints: ResMut<ImpulseJointSet>,
+) {
+    if let Ok((joint_handle, JointMotorParams { stiffness, damping })) = joint.single() {
+        let joint = joints.get_mut(joint_handle.handle()).unwrap();
+        let transform = body.relative.get::<Parent>();
+        let (x, y, z, w) = (
+            transform.rotation.x,
+            transform.rotation.y,
+            transform.rotation.z,
+            transform.rotation.w,
+        );
+        let (x2, y2, z2) = (x.powi(2), y.powi(2), z.powi(2));
+        let yaw = (2.0 * (y * w - z * x)).atan2(1.0 - 2.0 * (y2 + x2));
+        let pitch = -(2.0 * (z * y + x * w)).asin();
+        let roll = (2.0 * (z * w - y * x)).atan2(1.0 - 2.0 * (z2 + x2));
+
+        joint.data = joint
+            .data
+            .motor_position(JointAxis::AngX, pitch, *stiffness, *damping)
+            .motor_position(JointAxis::AngY, yaw, *stiffness, *damping)
+            .motor_position(JointAxis::AngZ, roll, *stiffness, *damping);
     }
 }

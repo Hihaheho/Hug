@@ -8,3 +8,4 @@ pub mod setup_player;
 pub mod ui;
 #[cfg(target_arch = "wasm32")]
 pub mod wasm;
+pub mod scene;

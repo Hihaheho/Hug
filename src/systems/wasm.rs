@@ -13,14 +13,14 @@ pub fn resize(mut windows: ResMut<Windows>) {
 }
 
 #[derive(PartialEq)]
-pub enum Message {
+pub enum IphoneMessage {
     NotDeleted,
     Deleted,
 }
 
-pub fn remove_message(time: Res<Time>, mut message: ResMut<Message>) {
-    if time.seconds_since_startup() > 0.3 && *message == Message::NotDeleted {
-        *message = Message::Deleted;
+pub fn remove_message(time: Res<Time>, mut message: ResMut<IphoneMessage>) {
+    if time.seconds_since_startup() > 0.3 && *message == IphoneMessage::NotDeleted {
+        *message = IphoneMessage::Deleted;
         web_sys::window()
             .unwrap()
             .document()
