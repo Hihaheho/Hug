@@ -20,7 +20,7 @@ jobs:
       - run: cargo install wasm-bindgen-cli --version 0.2.69
 
       - name: Build wasm
-        run: cargo build --target wasm32-unknown-unknown --release --features web
+        run: RUSTFLAGS=--cfg=web_sys_unstable_apis cargo build --target wasm32-unknown-unknown --release --features web
 
       - name: wasm-bindgen
         run: wasm-bindgen --out-dir .public --target web target/wasm32-unknown-unknown/release/hug.wasm

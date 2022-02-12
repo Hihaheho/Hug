@@ -39,6 +39,12 @@
       function room() {
         window.localStorage.setItem("room", "true");
       }
+      let params = new URLSearchParams(window.location.search);
+      if (params.get("key")) {
+        window.localStorage.setItem("key", params.get("key"));
+      } else {
+        window.localStorage.removeItem("key");
+      }
     </script>
     <div id="buttons">
       <button id="random" onclick="random()">Random</button>
@@ -46,7 +52,27 @@
     </div>
   </body>
   <script type="module">
-    import init from './hug.js'
+    import init, {on_output} from './hug.js'
+    import { Socket } from "./phoenix.esm.js"
+
+    let socket;
+    let params = new URLSearchParams(window.location.search);
+    if (params.get("local")) {
+      socket = new Socket("ws://localhost:4000/socket", {params: {}})
+    } else {
+      socket = new Socket("wss://server.hug.hihaheho.com/socket", {params: {}})
+    }
+    socket.connect()
+    let channel = socket.channel("player", {})
+    channel.join()
+      .receive("ok", resp => { console.log("Joined successfully", resp) })
+      .receive("error", resp => { console.log("Unable to join", resp) })
+
+    document.push = payload => channel.push("input", JSON.parse(payload));
+    channel.on("output", payload => {
+      on_output(JSON.stringify(payload))
+    });
+
     init()
   </script>
 </html>

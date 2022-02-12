@@ -20,7 +20,6 @@ bevy_rapier3d = { git = "https://github.com/ryo33/bevy_rapier", rev = "df37ed466
 # bevy_mod_debugdump = "0.3"
 bitflags = "1.3"
 console_error_panic_hook = "0.1"
-web-sys = { version = "0.3", features = ["Window", "Storage"] }
 bevy_webgl2 = { version = "0.5", optional = true }
 cross-websocket = "0.1.3"
 futures = "0.3"
@@ -30,7 +29,11 @@ parking_lot = "0.12"
 lazy_static = "1.4"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+web-sys = { git = "https://github.com/ryo33/wasm-bindgen", rev = "7f293a0cd9d51eb5b476563149763f6ef39fa74e", package = "web-sys", features = ["console", "Window", "Document", "Element", "Storage", "Navigator", "ShareData", "Clipboard"] }
+js-sys = { version = '0.3.46' }
+wasm-bindgen = "0.2"
 
 [patch.crates-io]
 # bevy = { git = "https://github.com/bevyengine/bevy", rev = "3431335ee9a2e3cfda81485d8080f85c0bc50461" }
 winit = { git = "https://github.com/ryo33/winit", rev = "590d44016e3cdf08c94165236a8ce246cb2efeaf", features = ["web-sys"] }
+web-sys = { git = "https://github.com/ryo33/wasm-bindgen", rev = "7f293a0cd9d51eb5b476563149763f6ef39fa74e" }

@@ -2,20 +2,21 @@ mod components;
 mod plugins;
 mod systems;
 
+use js_sys::Function;
 use std::f32::consts::PI;
+use wasm_bindgen::prelude::*;
 
 use bevy::{
     ecs::component::Component,
     prelude::{shape as bevy_shape, *},
 };
 use bevy_rapier3d::{
-    na::{Normed, Vector3},
     physics::{JointHandleComponent, PhysicsSystems},
     prelude::*,
 };
 use components::{
     body::{part::*, PlayerBody},
-    physics::{CollisionTag, Joint, JointMotorParams},
+    physics::{Joint, JointMotorParams},
     player::{Player, Player1, Player2},
     state::AppState,
 };
@@ -24,6 +25,7 @@ use plugins::networking::NetworkPlugin;
 use systems::{
     active_ragdoll::{hand_baloon_system, head_baloon_system, hip_baloon_system},
     control::{keyboard_input, move_system, move_system2, touch_input},
+    networking::BUFFER,
     setup_player::setup_player,
 };
 
@@ -221,4 +223,9 @@ fn angular_spring_system<T: Player, Parent: Component, Child: Component>(
             .motor_position(JointAxis::AngY, yaw, *stiffness, *damping)
             .motor_position(JointAxis::AngZ, roll, *stiffness, *damping);
     }
+}
+
+#[wasm_bindgen]
+pub fn on_output(output: &str) {
+    BUFFER.lock().push(output.into());
 }
