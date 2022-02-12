@@ -35,5 +35,5 @@ wasm-bindgen = "0.2"
 
 [patch.crates-io]
 # bevy = { git = "https://github.com/bevyengine/bevy", rev = "3431335ee9a2e3cfda81485d8080f85c0bc50461" }
-winit = { git = "https://github.com/ryo33/winit", rev = "590d44016e3cdf08c94165236a8ce246cb2efeaf", features = ["web-sys"] }
+winit = { git = "https://github.com/ryo33/winit", rev = "0ef56f129205f102da3532405a849d8cf32c9ae3", features = ["web-sys"] }
 web-sys = { git = "https://github.com/ryo33/wasm-bindgen", rev = "7f293a0cd9d51eb5b476563149763f6ef39fa74e" }

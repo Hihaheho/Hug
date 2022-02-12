@@ -36,6 +36,8 @@ pub enum HugSystems {
     ProgagateTransformSystem,
 }
 
+pub const WIDTH: f32 = 300.0;
+
 #[bevy_main]
 fn main() {
     #[cfg(target_arch = "wasm32")]
@@ -47,7 +49,6 @@ fn main() {
     win.scale_factor_override = Some(1.0);
     #[cfg(target_arch = "wasm32")]
     {
-        const WIDTH: f32 = 300.0;
         let js_window = web_sys::window().unwrap();
         let width = js_window.inner_width().unwrap().as_f64().unwrap() as f32;
         let height = js_window.inner_height().unwrap().as_f64().unwrap() as f32;

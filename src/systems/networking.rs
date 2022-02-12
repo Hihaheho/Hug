@@ -28,7 +28,7 @@ pub fn sender(mut sender: ResMut<Sender>) {
                 .into_iter()
                 .map(|message| serde_json::to_string(&message).unwrap())
             {
-                push.call1(&JsValue::NULL, &message.into());
+                let _ = push.call1(&JsValue::NULL, &message.into());
             }
         }
     }
@@ -102,7 +102,7 @@ pub fn handle_events(
                     let _ = navigator.share(data);
                 } else {
                     let mut clipboard = navigator.clipboard();
-                    clipboard.write_text(&format!("Hug with Me?\n{}", url));
+                    let _ = clipboard.write_text(&format!("Hug with Me?\n{}", url));
                     window.alert_with_message("Copied to clipboard").unwrap();
                 }
                 // }
@@ -128,7 +128,6 @@ pub fn join_room(mut sender: ResMut<Sender>, mut state: ResMut<State<AppState>>)
     let storage = window.local_storage().unwrap().unwrap();
     if let Ok(Some(key)) = storage.get_item("key") {
         if key.len() != 0 {
-            web_sys::console::log_1(&format!("key {}", key).into());
             sender.0.push(HugCommand::JoinRoom { key });
             let _ = state.set(AppState::MatchingByKey);
         }
