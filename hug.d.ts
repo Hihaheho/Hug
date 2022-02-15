@@ -8,6 +8,15 @@ export function on_output(output: string): void;
 * @param {string} name
 */
 export function on_name_change(name: string): void;
+/**
+*/
+export function on_click_random(): void;
+/**
+*/
+export function on_click_room(): void;
+/**
+*/
+export function on_click_share(): void;
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
@@ -15,6 +24,9 @@ export interface InitOutput {
   readonly memory: WebAssembly.Memory;
   readonly on_output: (a: number, b: number) => void;
   readonly on_name_change: (a: number, b: number) => void;
+  readonly on_click_random: () => void;
+  readonly on_click_room: () => void;
+  readonly on_click_share: () => void;
   readonly main: (a: number, b: number) => number;
   readonly __wbindgen_malloc: (a: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number) => number;

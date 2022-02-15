@@ -23,7 +23,8 @@
       }
       button {
         font-size: 2.5em;
-        width: 30%;
+        text-align: center;
+        display: inline-block;
       }
       #message, #alert {
         font-size: 2.5em;
@@ -31,6 +32,12 @@
       #name {
         font-size: 2.5em;
         width: 30%;
+      }
+      #random, #room {
+        background-color: #99ee77;
+      }
+      #share {
+        background-color: #7799ee;
       }
     </style>
   </head>
@@ -41,8 +48,10 @@
 			<p>iPhoneのSafariをお使いの方は、「iPhoneでWebGL2.0を有効にする方法」でググってください。</p>
 		</div>
     <div id="buttons">
+      <button id="about">About</button>
       <button id="random">Random</button>
       <button id="room">New Room</button>
+      <button id="share">Share</button>
       <input id="name" type="text" placeholder="Name" />
       <p id="message"></p>
       <p id="alert"></p>
@@ -50,7 +59,9 @@
   </body>
 
   <script type="module">
-    import init, {on_output, on_name_change} from './hug.js'
+    import init, {
+      on_output, on_name_change, on_click_random, on_click_room, on_click_share
+    } from './hug.js'
     import { Socket } from "./phoenix.esm.js"
 
     let socket;
@@ -79,10 +90,9 @@
       window.localStorage.removeItem("key");
     }
 
-    document.querySelector("#random").onclick = () =>
-      window.localStorage.setItem("random", "true");
-    document.querySelector("#room").onclick = () =>
-      window.localStorage.setItem("room", "true");
+    document.querySelector("#random").onclick = () => on_click_random();
+    document.querySelector("#room").onclick = () => on_click_room();
+    document.querySelector("#share").onclick = () => on_click_share();
     document.querySelector("#name").oninput = (event) =>
       on_name_change(event.target.value);
 
