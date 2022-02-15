@@ -4,12 +4,12 @@ mod systems;
 
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
-use plugins::{body::BodyPlugin, ui::UiPlugin};
+use plugins::body::BodyPlugin;
 use wasm_bindgen::prelude::*;
 
 use components::state::AppState;
 #[cfg(target_arch = "wasm32")]
-use plugins::networking::NetworkPlugin;
+use plugins::{networking::NetworkPlugin, ui::UiPlugin};
 use systems::{scene::setup, setup_player::setup_player};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, SystemLabel)]
@@ -62,7 +62,14 @@ fn main() {
     app.run();
 }
 
+#[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
 pub fn on_output(output: &str) {
     systems::networking::BUFFER.lock().push(output.into());
+}
+
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
+pub fn on_name_change(name: &str) {
+    *systems::networking::NAME.lock() = name.into();
 }

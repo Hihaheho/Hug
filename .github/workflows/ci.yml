@@ -25,6 +25,8 @@ jobs:
       - name: wasm-bindgen
         run: wasm-bindgen --out-dir .public --target web target/wasm32-unknown-unknown/release/hug.wasm
 
+      - run: cp -r assets .public/
+
       - uses: JamesIves/github-pages-deploy-action@4.1.4
         with:
           branch: gh-pages

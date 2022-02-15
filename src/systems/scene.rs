@@ -7,6 +7,7 @@ pub fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    // asset_server: Res<AssetServer>,
     // mut integration: ResMut<IntegrationParameters>,
 ) {
     // integration.dt = 0.000000;
@@ -78,8 +79,11 @@ pub fn setup(
 
     // camera
     commands.spawn_bundle(PerspectiveCameraBundle {
-        transform: Transform::from_xyz(-2.0, 1.5, 2.5)
-            .looking_at(Vec3::new(0.0, 1.5, 0.0), Vec3::Y),
+        transform: Transform::from_xyz(-0.5, 1.6, 2.5)
+            .looking_at(Vec3::new(0.0, 1.2, 0.0), Vec3::Y),
         ..Default::default()
     });
+
+    // UI camera
+    commands.spawn_bundle(UiCameraBundle::default());
 }

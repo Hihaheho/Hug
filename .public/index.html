@@ -25,42 +25,32 @@
         font-size: 2.5em;
         width: 30%;
       }
-      #message {
+      #message, #alert {
         font-size: 2.5em;
       }
-      #alert {
+      #name {
         font-size: 2.5em;
+        width: 30%;
       }
     </style>
   </head>
+
   <body>
 		<div id="iphone">
-			<p>If you're using Safari on iPhone, please google how to enable WebGL2.0 on iPhone, or try Google Chrome.</p>
-			<p>iPhoneのSafariをお使いの方は、「iPhoneでWebGL2.0を有効にする方法」でググっていただくか、Google Chromeをお試しください。</p>
+			<p>If you're using Safari on iPhone, please google how to enable WebGL2.0 on iPhone.</p>
+			<p>iPhoneのSafariをお使いの方は、「iPhoneでWebGL2.0を有効にする方法」でググってください。</p>
 		</div>
-    <script>
-      function random() {
-        window.localStorage.setItem("random", "true");
-      }
-      function room() {
-        window.localStorage.setItem("room", "true");
-      }
-      let params = new URLSearchParams(window.location.search);
-      if (params.get("key")) {
-        window.localStorage.setItem("key", params.get("key"));
-      } else {
-        window.localStorage.removeItem("key");
-      }
-    </script>
     <div id="buttons">
-      <button id="random" onclick="random()">Random</button>
-      <button id="room" onclick="room()">New Room</button>
+      <button id="random">Random</button>
+      <button id="room">New Room</button>
+      <input id="name" type="text" placeholder="Name" />
       <p id="message"></p>
       <p id="alert"></p>
     </div>
   </body>
+
   <script type="module">
-    import init, {on_output} from './hug.js'
+    import init, {on_output, on_name_change} from './hug.js'
     import { Socket } from "./phoenix.esm.js"
 
     let socket;
@@ -76,10 +66,25 @@
       .receive("ok", resp => { console.log("Joined successfully", resp) })
       .receive("error", resp => { console.log("Unable to join", resp) })
 
+    // register event handlers for input/output.
     document.push = payload => channel.push("input", JSON.parse(payload));
     channel.on("output", payload => {
       on_output(JSON.stringify(payload))
     });
+
+    // join room by key
+    if (params.get("key")) {
+      window.localStorage.setItem("key", params.get("key"));
+    } else {
+      window.localStorage.removeItem("key");
+    }
+
+    document.querySelector("#random").onclick = () =>
+      window.localStorage.setItem("random", "true");
+    document.querySelector("#room").onclick = () =>
+      window.localStorage.setItem("room", "true");
+    document.querySelector("#name").oninput = (event) =>
+      on_name_change(event.target.value);
 
     init()
   </script>

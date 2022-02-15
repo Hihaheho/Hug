@@ -19,9 +19,10 @@ pub const TORSO_WIDTH: f32 = 4.0 * RATIO;
 pub const TORSO_THICKNESS: f32 = 1.4 * RATIO;
 // pub const TORSO_ROUNDNESS: f32 = 0.1;
 pub const NECK_RADIUS: f32 = 0.8 * RATIO;
-pub const HEAD_WIDTH: f32 = 3.5 * RATIO;
-pub const HEAD_THICKNESS: f32 = 2.2 * RATIO;
-pub const ARM_RADIUS: f32 = 0.6 * RATIO;
+pub const HEAD_WIDTH: f32 = 2.8 * RATIO;
+pub const HEAD_HEIGHT: f32 = 2.8 * RATIO;
+pub const HEAD_THICKNESS: f32 = 2.0 * RATIO;
+pub const ARM_RADIUS: f32 = 0.55 * RATIO;
 pub const LEG_RADIUS: f32 = 0.8 * RATIO;
 pub const SHIN_LENGTH: f32 = 3.5 * RATIO;
 pub const THIGH_LENGTH: f32 = 3.5 * RATIO;
@@ -67,7 +68,7 @@ impl Body {
         body.0
             .insert(Neck.type_id(), Transform::from_xyz(0.0, 0.8 * RATIO, 0.0));
         body.0
-            .insert(Head.type_id(), Transform::from_xyz(0.0, 3. * RATIO, 0.0));
+            .insert(Head.type_id(), Transform::from_xyz(0.0, HEAD_HEIGHT, 0.0));
         body.0.insert(
             UpperArmLeft.type_id(),
             Transform::from_xyz(x * -SHOULDER_LENGTH, 0.0, 0.0),

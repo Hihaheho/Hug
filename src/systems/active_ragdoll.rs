@@ -31,7 +31,7 @@ pub fn hip_baloon_system<T: Player>(
     for (mut forces, pos) in head.iter_mut() {
         let t = pos.position.translation;
         let diff = body.absolute.get::<Hip>().translation - Vec3::new(t.x, t.y, t.z);
-		let force = 2.0 * diff;
+		let force = 3.0 * diff;
         forces.force += vector!(force.x, force.y, force.z);
     }
 }

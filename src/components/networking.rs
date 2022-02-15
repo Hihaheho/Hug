@@ -1,5 +1,9 @@
+use std::marker::PhantomData;
+
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
+
+use super::player::Player;
 
 #[derive(Serialize, Deserialize)]
 #[serde(tag = "type")]
@@ -37,6 +41,7 @@ pub enum Payload {
         player1_hand_right: Vec3,
         player2_hand_right: Vec3,
     },
+    Name(String),
 }
 
 pub struct Receiver(pub Vec<HugEvent>);
@@ -50,3 +55,6 @@ pub enum IsPrimary {
     Yes,
     No,
 }
+
+#[derive(Default)]
+pub struct PlayerName<P: Player>(pub String, PhantomData<P>);

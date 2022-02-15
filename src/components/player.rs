@@ -8,6 +8,8 @@ pub struct Player1;
 #[derive(Copy, Clone, Default)]
 pub struct Player2;
 
+pub struct NameText;
+
 pub trait Player: Component + Default {
     fn get_collision_tag() -> CollisionTag;
 }
