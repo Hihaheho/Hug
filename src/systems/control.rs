@@ -16,13 +16,9 @@ pub fn touch_input(
     touches: Res<Touches>,
     desc: Res<WindowDescriptor>,
 ) {
-    let scale = desc.scale_factor_override.unwrap() as f32;
     for touch in touches.iter() {
         let delta = touch.delta();
         let delta = Vec2::new(delta.x / (WIDTH / 5.0), delta.y / (WIDTH / 2.0));
-        // web_sys::console::log_1(&format!("scale {}", scale).into());
-        // web_sys::console::log_1(&format!("width {}", width).into());
-        // web_sys::console::log_1(&format!("x {}", touch.start_position().x / 2.0).into());
         if touch.start_position().x < WIDTH / 2.0 {
             control.add_left(delta);
         } else {

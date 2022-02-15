@@ -2,13 +2,10 @@ use bevy::{
     prelude::*,
     render::camera::{Camera, PerspectiveProjection},
 };
-use bevy_rapier3d::prelude::{RigidBodyPosition, RigidBodyPositionComponent};
+use bevy_rapier3d::prelude::RigidBodyPositionComponent;
 
 use crate::components::{
-    body::{
-        part::{HandRight, Head},
-        BodyPart,
-    },
+    body::BodyPart,
     networking::PlayerName,
     player::{NameText, Player},
 };
@@ -76,7 +73,7 @@ pub fn update_name<P: Player>(
     }
 }
 
-pub fn update_name_position<P: Player, Part: BodyPart, const left: bool>(
+pub fn update_name_position<P: Player, Part: BodyPart, const LEFT: bool>(
     mut name: Query<&mut Style, (With<P>, With<NameText>)>,
     head: Query<&RigidBodyPositionComponent, (With<P>, With<Part>)>,
     camera: Query<(&Camera, &GlobalTransform), With<PerspectiveProjection>>,
@@ -92,7 +89,7 @@ pub fn update_name_position<P: Player, Part: BodyPart, const left: bool>(
                 );
                 let vec = camera.world_to_screen(&windows, &transform, vec).unwrap();
                 name.position.bottom = Val::Px(vec.y);
-                if left {
+                if LEFT {
                     name.position.left = Val::Px(vec.x - 10.0);
                 } else {
                     name.position.right = Val::Px(vec.x - 10.0);

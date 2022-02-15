@@ -1,7 +1,5 @@
 use bevy::prelude::*;
 
-const WIDTH: f32 = 600.0;
-
 pub fn resize(mut windows: ResMut<Windows>) {
     let js_window = web_sys::window().unwrap();
     let window = windows.get_primary_mut().unwrap();

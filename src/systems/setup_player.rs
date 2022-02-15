@@ -224,7 +224,7 @@ fn joint<Parent: Component, Child: Component, T: Player>(
         .insert(joint);
 }
 
-fn small_collider<T: Player>(transform: &Transform) -> ColliderBundle {
+fn small_collider<T: Player>(_transform: &Transform) -> ColliderBundle {
     ColliderBundle {
         mass_properties: ColliderMassProps::Density(50.0).into(),
         ..collider_bundle::<T>(Vec3::ZERO, ColliderShape::cuboid(0.05, 0.05, 0.05))
