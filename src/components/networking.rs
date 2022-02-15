@@ -1,4 +1,4 @@
-use std::marker::PhantomData;
+use std::{marker::PhantomData, time::Duration};
 
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -58,3 +58,5 @@ pub enum IsPrimary {
 
 #[derive(Default)]
 pub struct PlayerName<P: Player>(pub String, PhantomData<P>);
+
+pub struct ElapsedTime(pub Duration);

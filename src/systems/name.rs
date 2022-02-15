@@ -23,7 +23,7 @@ pub fn load_font(mut commands: Commands, mut fonts: ResMut<Assets<Font>>) {
     commands.insert_resource(font);
 }
 
-pub fn insert_name<P: Player>(
+pub fn insert_name<P: Player, const LEFT: bool>(
     mut commands: Commands,
     name: Res<PlayerName<P>>,
     font: Res<Handle<Font>>,
@@ -33,11 +33,8 @@ pub fn insert_name<P: Player>(
         commands
             .spawn_bundle(TextBundle {
                 style: Style {
-                    align_self: AlignSelf::FlexEnd,
                     position_type: PositionType::Absolute,
                     position: Rect {
-                        bottom: Val::Px(5.0),
-                        right: Val::Px(15.0),
                         ..Default::default()
                     },
                     ..Default::default()
@@ -85,14 +82,15 @@ pub fn update_name_position<P: Player, Part: BodyPart, const LEFT: bool>(
                 let vec = Vec3::new(
                     head.0.position.translation.x,
                     head.0.position.translation.y,
-                    0.0,
+                    head.0.position.translation.z,
                 );
                 let vec = camera.world_to_screen(&windows, &transform, vec).unwrap();
                 name.position.bottom = Val::Px(vec.y);
                 if LEFT {
-                    name.position.left = Val::Px(vec.x - 10.0);
+                    name.position.left = Val::Px(vec.x);
                 } else {
-                    name.position.right = Val::Px(vec.x - 10.0);
+                    let window = windows.get_primary().unwrap();
+                    name.position.left = Val::Px(vec.x - window.width() * 0.3);
                 }
             }
         }

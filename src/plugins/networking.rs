@@ -1,13 +1,15 @@
+use std::time::Duration;
+
 use bevy::prelude::*;
 
 use crate::{
     components::{
-        networking::{IsPrimary, PushTimer, Receiver, Sender, SyncTimer},
+        networking::{ElapsedTime, IsPrimary, PushTimer, Receiver, Sender, SyncTimer},
         state::AppState,
     },
     systems::networking::{
-        event_handlers, handle_event::handle_events, join_room, sync, transport, update_name,
-        when_connect,
+        elapse_time, event_handlers, handle_event::handle_events, join_room, sync, transport,
+        update_name, when_connect,
     },
     HugSystems,
 };
@@ -18,8 +20,9 @@ impl Plugin for NetworkPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.insert_resource(Sender(Vec::new()))
             .insert_resource(Receiver(Vec::new()))
-            .insert_resource(PushTimer(Timer::from_seconds(0.2, true)))
+            .insert_resource(PushTimer(Timer::from_seconds(1.0 / 20.0, true)))
             .insert_resource(SyncTimer(Timer::from_seconds(1.0, true)))
+            .insert_resource(ElapsedTime(Duration::default()))
             .insert_resource(IsPrimary::No)
             .add_startup_system(join_room.system())
             .add_system_to_stage(CoreStage::PreUpdate, transport::sender.system())
@@ -57,6 +60,11 @@ impl Plugin for NetworkPlugin {
             .add_system_set(
                 SystemSet::on_exit(AppState::Connected)
                     .with_system(event_handlers::cleanup.system()),
+            )
+            .add_system(
+                elapse_time
+                    .system()
+                    .with_run_criteria(when_connect.system()),
             );
     }
 }

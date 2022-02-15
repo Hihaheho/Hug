@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::components::{
     control::HandControl,
-    networking::{HugCommand, Payload, PlayerName, Sender},
+    networking::{ElapsedTime, HugCommand, Payload, PlayerName, Sender},
     player::{Player1, Player2},
     ui::Message,
 };
@@ -16,9 +16,14 @@ pub fn create_room(mut sender: ResMut<Sender>) {
     sender.0.push(HugCommand::CreateRoom);
 }
 
-pub fn cleanup(mut name: ResMut<PlayerName<Player2>>, mut control: ResMut<HandControl<Player2>>) {
+pub fn cleanup(
+    mut name: ResMut<PlayerName<Player2>>,
+    mut control: ResMut<HandControl<Player2>>,
+    mut time: ResMut<ElapsedTime>,
+) {
     name.0 = "".into();
     *control = Default::default();
+    time.0 = Default::default();
 }
 
 pub fn on_connected(

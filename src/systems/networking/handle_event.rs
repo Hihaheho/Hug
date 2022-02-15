@@ -1,14 +1,16 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
-use web_sys::ShareData;
 
-use crate::components::{
-    body::part::*,
-    control::HandControl,
-    networking::{HugEvent, IsPrimary, Payload, PlayerName, Receiver},
-    player::{Player1, Player2},
-    state::AppState,
-    ui::{Alert, Message},
+use crate::{
+    adapters::share::navigator_share,
+    components::{
+        body::part::*,
+        control::HandControl,
+        networking::{HugEvent, IsPrimary, Payload, PlayerName, Receiver},
+        player::{Player1, Player2},
+        state::AppState,
+        ui::{Alert, Message},
+    },
 };
 
 pub fn handle_events(
@@ -42,27 +44,8 @@ pub fn handle_events(
             }
             HugEvent::RoomCreated { key } => unsafe {
                 web_sys::console::log_1(&format!("Room created: {}", key).into());
-                let window = web_sys::window().unwrap();
-                let navigator = window.navigator();
-                let mut data = ShareData::new();
-                let url = &format!("https://hug.hihaheho.com?key={}", key);
-                data.title("Hug");
-                data.text("Hug with Me?");
-                data.url(url);
-
-                #[cfg(web_sys_unstable_apis)]
-                {
-                    let mut clipboard = navigator.clipboard();
-                    let _ = clipboard.write_text(&format!("Hug with Me?\n{}", url));
-                }
-                if js_sys::Reflect::get(&navigator, &"share".into())
-                    .unwrap()
-                    .is_function()
-                {
-                    let _ = navigator.share(data);
-                } else {
-                    alert.0 = "Copied to clipboard".into();
-                }
+                let url = &format!("?key={}", key);
+                navigator_share("Hug with Me?", url, &mut alert);
                 message.0 = "Room created share the url to your friends".into();
             },
             HugEvent::NotFound => {

@@ -1,6 +1,7 @@
 mod components;
 mod plugins;
 mod systems;
+mod adapters;
 
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
@@ -72,4 +73,22 @@ pub fn on_output(output: &str) {
 #[wasm_bindgen]
 pub fn on_name_change(name: &str) {
     *systems::networking::NAME.lock() = name.into();
+}
+
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
+pub fn on_click_random() {
+    *systems::networking::RANDOM_BUTTON.lock() = true;
+}
+
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
+pub fn on_click_room() {
+    *systems::networking::ROOM_BUTTON.lock() = true;
+}
+
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
+pub fn on_click_share() {
+    *systems::networking::SHARE_BUTTON.lock() = true;
 }

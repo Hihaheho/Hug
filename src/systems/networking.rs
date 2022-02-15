@@ -4,28 +4,22 @@ pub mod sync;
 pub mod transport;
 
 use bevy::{ecs::schedule::ShouldRun, prelude::*};
-use bevy_rapier3d::prelude::{RigidBodyPosition, RigidBodyPositionComponent};
-use js_sys::Function;
 use parking_lot::Mutex;
-use wasm_bindgen::JsValue;
-use web_sys::ShareData;
 
 use crate::components::{
-    body::part::*,
-    control::HandControl,
-    networking::{
-        HugCommand, HugEvent, IsPrimary, Payload, PlayerName, PushTimer, Receiver, Sender,
-        SyncTimer,
-    },
-    player::{Player1, Player2},
+    networking::{ElapsedTime, HugCommand, PlayerName, Sender},
+    player::Player1,
     state::AppState,
-    ui::{Alert, Message},
+    ui::Message,
 };
 
 lazy_static::lazy_static! {
     pub static ref BUFFER: Mutex<Vec<String>> = Mutex::new(Vec::new());
     pub static ref SEND_BUFFER: Mutex<Vec<String>> = Mutex::new(Vec::new());
     pub static ref NAME: Mutex<String> = Mutex::new("nameless".into());
+    pub static ref RANDOM_BUTTON: Mutex<bool> = Mutex::new(false);
+    pub static ref ROOM_BUTTON: Mutex<bool> = Mutex::new(false);
+    pub static ref SHARE_BUTTON: Mutex<bool> = Mutex::new(false);
 }
 
 pub fn when_connect(state: Res<State<AppState>>) -> ShouldRun {
@@ -57,4 +51,8 @@ pub fn update_name(mut name: ResMut<PlayerName<Player1>>) {
     if *name_value != name.0 {
         name.0 = name_value.clone();
     }
+}
+
+pub fn elapse_time(mut elapsed_time: ResMut<ElapsedTime>, time: Res<Time>) {
+    elapsed_time.0 += time.delta();
 }
