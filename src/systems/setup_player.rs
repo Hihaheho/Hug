@@ -99,6 +99,20 @@ fn create_player<T: Player + Copy>(
     commands
         .spawn()
         .insert(JointBuilderComponent::new(joint, ground, hip));
+    let trans = body.absolute.get::<FootLeft>().translation;
+    let joint = SphericalJoint::new()
+        .local_anchor1(point!(trans.x, trans.y + 0.5, trans.z))
+        .local_anchor2(point!(0.0, 0.0, 0.0));
+    commands
+        .spawn()
+        .insert(JointBuilderComponent::new(joint, ground, foot_left));
+    let trans = body.absolute.get::<FootRight>().translation;
+    let joint = SphericalJoint::new()
+        .local_anchor1(point!(trans.x, trans.y + 0.5, trans.z))
+        .local_anchor2(point!(0.0, 0.0, 0.0));
+    commands
+        .spawn()
+        .insert(JointBuilderComponent::new(joint, ground, foot_right));
 
     let m = materials.add(color.into());
     insert_mesh::<T, Spine>(commands, meshes, m.clone(), &body, spine, torso_mesh::<T>);

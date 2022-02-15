@@ -134,7 +134,7 @@ pub fn handle_events(
 }
 
 fn position_vec(position: &mut RigidBodyPositionComponent, vec: &Vec3) {
-    position.0.position.translation.x = vec.x;
-    position.0.position.translation.y = vec.y;
-    position.0.position.translation.z = vec.z;
+    position.0.next_position.translation.x = vec.x;
+    position.0.next_position.translation.y = vec.y;
+    position.0.next_position.translation.z = vec.z;
 }
