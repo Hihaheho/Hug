@@ -63,9 +63,11 @@ pub fn sync_parts(
 }
 
 pub fn sync_name(mut sender: ResMut<Sender>, name: Res<PlayerName<Player1>>) {
-    sender.0.push(HugCommand::Push {
-        payload: Payload::Name(name.0.clone()),
-    });
+    if name.is_changed() {
+        sender.0.push(HugCommand::Push {
+            payload: Payload::Name(name.0.clone()),
+        });
+    }
 }
 
 fn position_to_vec(position: &RigidBodyPosition) -> Vec3 {
