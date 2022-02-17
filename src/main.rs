@@ -1,14 +1,17 @@
+mod adapters;
 mod components;
 mod plugins;
 mod systems;
-mod adapters;
 
 use bevy::prelude::*;
+
+use bevy_inspector_egui::WorldInspectorPlugin;
 use bevy_rapier3d::prelude::*;
+use parking_lot::Mutex;
 use plugins::body::BodyPlugin;
 use wasm_bindgen::prelude::*;
 
-use components::state::AppState;
+use components::{state::AppState, ui::Device};
 #[cfg(target_arch = "wasm32")]
 use plugins::{networking::NetworkPlugin, ui::UiPlugin};
 use systems::{scene::setup, setup_player::setup_player};
@@ -30,17 +33,27 @@ fn main() {
     let mut app = App::build();
 
     let mut win = WindowDescriptor::default();
-    win.scale_factor_override = Some(1.0);
+    let mut device = Device::Desktop;
     #[cfg(target_arch = "wasm32")]
     {
-        let js_window = web_sys::window().unwrap();
-        let width = js_window.inner_width().unwrap().as_f64().unwrap() as f32;
-        let height = js_window.inner_height().unwrap().as_f64().unwrap() as f32;
-        let ratio = WIDTH / width;
-        win.scale_factor_override = Some(ratio as f64);
+        win.scale_factor_override = Some(1.0);
+        let document = web_sys::window().unwrap().document().unwrap();
+        let is_iphone = unsafe { js_sys::Reflect::get(&document, &"is_iphone".into()).unwrap() };
+        if !is_iphone.is_falsy() {
+            let js_window = web_sys::window().unwrap();
+            let width = js_window.inner_width().unwrap().as_f64().unwrap() as f32;
+            let height = js_window.inner_height().unwrap().as_f64().unwrap() as f32;
+            let ratio = WIDTH / width;
+            win.scale_factor_override = Some(ratio as f64);
+        }
+        let is_mobile = unsafe { js_sys::Reflect::get(&document, &"is_mobile".into()).unwrap() };
+        if !is_mobile.is_falsy() {
+            device = Device::Mobile;
+        }
     }
 
     app.insert_resource(win)
+        .insert_resource(device)
         .add_plugins(DefaultPlugins)
         .add_plugin(BodyPlugin)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
@@ -48,6 +61,9 @@ fn main() {
         .add_startup_system(setup.system())
         .add_startup_system(setup_player.system())
         .add_state(AppState::Alone);
+
+    #[cfg(not(target_arch = "wasm32"))]
+    app.add_plugin(WorldInspectorPlugin::new());
 
     #[cfg(target_arch = "wasm32")]
     app.add_plugin(NetworkPlugin).add_plugin(UiPlugin);

@@ -114,7 +114,13 @@ fn create_player<T: Player + Copy>(
         .spawn()
         .insert(JointBuilderComponent::new(joint, ground, foot_right));
 
-    let m = materials.add(color.into());
+    let m = materials.add(StandardMaterial {
+        base_color: color,
+        roughness: 0.3,
+        metallic: 0.0,
+        reflectance: 0.1,
+        ..Default::default()
+    });
     insert_mesh::<T, Spine>(commands, meshes, m.clone(), &body, spine, torso_mesh::<T>);
     insert_mesh::<T, Chest>(commands, meshes, m.clone(), &body, chest, torso_mesh::<T>);
     insert_mesh::<T, Neck>(commands, meshes, m.clone(), &body, neck, neck_mesh::<T>);

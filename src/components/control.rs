@@ -17,8 +17,18 @@ impl<T> Default for HandControl<T> {
     fn default() -> Self {
         Self {
             data: Default::default(),
-            left: Vec2::new(0.0, 0.0),
-            right: Vec2::new(1.0, 0.0),
+            left: Vec2::new(0.0 + 0.09, 0.1),
+            right: Vec2::new(1.0 - 0.09, 0.1),
+        }
+    }
+}
+
+impl<T> HandControl<T> {
+    pub fn default_absent() -> Self {
+        Self {
+            data: Default::default(),
+            left: Vec2::new(0.0, 0.5),
+            right: Vec2::new(1.0, 0.5),
         }
     }
 }

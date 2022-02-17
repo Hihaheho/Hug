@@ -8,11 +8,18 @@ pub fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     // asset_server: Res<AssetServer>,
-    // mut integration: ResMut<IntegrationParameters>,
+    mut integration: ResMut<IntegrationParameters>,
 ) {
-    // integration.dt = 0.000000;
+    integration.max_velocity_iterations = 5;
+    integration.max_stabilization_iterations = 2;
 
-    let wall_material = materials.add(Color::rgb(0.78, 0.73, 0.75).into());
+    let wall_material = materials.add(StandardMaterial {
+        base_color: Color::rgb(0.78, 0.73, 0.75),
+        roughness: 0.3,
+        metallic: 0.0,
+        reflectance: 0.5,
+        ..Default::default()
+    });
     // plane
     commands
         .spawn_bundle(PbrBundle {
@@ -58,10 +65,10 @@ pub fn setup(
     //     transform: Transform::from_xyz(2.0, 3.0, 2.0),
     //     ..Default::default()
     // });
-    commands.spawn_bundle(LightBundle {
-        transform: Transform::from_xyz(2.0, 3.0, 2.0),
-        ..Default::default()
-    });
+    // commands.spawn_bundle(LightBundle {
+    //     transform: Transform::from_xyz(2.0, 3.0, 2.0),
+    //     ..Default::default()
+    // });
     // // light
     // commands.spawn_bundle(PointLightBundle {
     //     point_light: PointLight {
@@ -73,13 +80,21 @@ pub fn setup(
     //     ..Default::default()
     // });
     commands.spawn_bundle(LightBundle {
-        transform: Transform::from_xyz(-2.0, 3.0, 2.0),
+        transform: Transform::from_xyz(-3.5, 3.0, -7.0),
+        light: Light {
+            intensity: 300.0,
+            ..Default::default()
+        },
+        ..Default::default()
+    });
+    commands.spawn_bundle(LightBundle {
+        transform: Transform::from_xyz(1.0, 3.0, 3.0),
         ..Default::default()
     });
 
     // camera
     commands.spawn_bundle(PerspectiveCameraBundle {
-        transform: Transform::from_xyz(-0.7, 1.5, 2.8)
+        transform: Transform::from_xyz(-2.4, 1.6, 2.6)
             .looking_at(Vec3::new(0.0, 1.2, 0.0), Vec3::Y),
         ..Default::default()
     });

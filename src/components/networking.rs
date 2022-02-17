@@ -8,7 +8,6 @@ use super::player::Player;
 #[derive(Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum HugCommand {
-    HeartBeat,
     JoinRoom { key: String },
     JoinRandom,
     CreateRoom,

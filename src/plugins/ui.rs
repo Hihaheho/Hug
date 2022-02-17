@@ -31,8 +31,8 @@ impl Plugin for UiPlugin {
             .add_system(insert_name::<Player2, false>.system())
             .add_system(update_name::<Player1>.system())
             .add_system(update_name::<Player2>.system())
-            .add_system(update_name_position::<Player1, ForearmRight, true>.system())
-            .add_system(update_name_position::<Player2, ForearmRight, false>.system())
+            .add_system(update_name_position::<Player1, UpperArmRight, true>.system())
+            .add_system(update_name_position::<Player2, UpperArmRight, false>.system())
             .add_system(share.system());
     }
 }

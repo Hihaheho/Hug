@@ -61,6 +61,9 @@ impl Plugin for NetworkPlugin {
                 SystemSet::on_exit(AppState::Connected)
                     .with_system(event_handlers::cleanup.system()),
             )
+            .add_system_set(
+                SystemSet::on_enter(AppState::Alone).with_system(event_handlers::alone.system()),
+            )
             .add_system(
                 elapse_time
                     .system()

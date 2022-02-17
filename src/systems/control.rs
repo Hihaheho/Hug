@@ -35,25 +35,25 @@ pub fn keyboard_input(
     if input.pressed(KeyCode::A) {
         control.add_left(Vec2::new(-1.0, 0.0) * time.delta_seconds());
     }
-    if input.pressed(KeyCode::S) {
+    if input.pressed(KeyCode::D) {
         control.add_left(Vec2::new(1.0, 0.0) * time.delta_seconds());
     }
     if input.pressed(KeyCode::W) {
         control.add_left(Vec2::new(0.0, 1.0) * time.delta_seconds());
     }
-    if input.pressed(KeyCode::R) {
+    if input.pressed(KeyCode::S) {
         control.add_left(Vec2::new(0.0, -1.0) * time.delta_seconds());
     }
-    if input.pressed(KeyCode::E) {
+    if input.pressed(KeyCode::J) {
         control.add_right(Vec2::new(-1.0, 0.0) * time.delta_seconds());
     }
-    if input.pressed(KeyCode::O) {
+    if input.pressed(KeyCode::L) {
         control.add_right(Vec2::new(1.0, 0.0) * time.delta_seconds());
     }
-    if input.pressed(KeyCode::Y) {
+    if input.pressed(KeyCode::I) {
         control.add_right(Vec2::new(0.0, 1.0) * time.delta_seconds());
     }
-    if input.pressed(KeyCode::I) {
+    if input.pressed(KeyCode::K) {
         control.add_right(Vec2::new(0.0, -1.0) * time.delta_seconds());
     }
 }

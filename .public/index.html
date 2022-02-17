@@ -22,16 +22,19 @@
         width: 100%;
       }
       button {
-        font-size: 2.5em;
+        font-size: 2.7em;
         text-align: center;
         display: inline-block;
       }
       #message, #alert {
-        font-size: 2.5em;
+        font-size: 2.7em;
       }
       #name {
-        font-size: 2.5em;
+        font-size: 2.7em;
         width: 30%;
+      }
+      #about {
+        font-size: 2.7em;
       }
       #random, #room {
         background-color: #99ee77;
@@ -48,9 +51,9 @@
 			<p>iPhoneのSafariをお使いの方は、「iPhoneでWebGL2.0を有効にする方法」でググってください。</p>
 		</div>
     <div id="buttons">
-      <button id="about">About</button>
+      <a id="about" href="https://hihaheho.com/hug">About</a>
       <button id="random">Random</button>
-      <button id="room">New Room</button>
+      <button id="room">Invite</button>
       <button id="share">Share</button>
       <input id="name" type="text" placeholder="Name" />
       <p id="message"></p>
@@ -60,7 +63,7 @@
 
   <script type="module">
     import init, {
-      on_output, on_name_change, on_click_random, on_click_room, on_click_share
+      on_output, on_name_change, on_click_random, on_click_room, on_click_share,
     } from './hug.js'
     import { Socket } from "./phoenix.esm.js"
 
@@ -95,6 +98,12 @@
     document.querySelector("#share").onclick = () => on_click_share();
     document.querySelector("#name").oninput = (event) =>
       on_name_change(event.target.value);
+
+    // https://stackoverflow.com/questions/7995752/detect-desktop-browser-not-mobile-with-javascript#comment106045591_16156769
+    document.is_mobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    document.is_iphone = navigator.platform == 'iPhone' || (navigator.userAgent.indexOf('Mac') != -1 && window.is_mobile);
+
+    document.querySelector("#name").focus
 
     init()
   </script>
