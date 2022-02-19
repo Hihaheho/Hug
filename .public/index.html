@@ -29,7 +29,6 @@
       .button {
         position: relative;
         top: 0px;
-        display: inline-block;
         border-style: solid;
         border-width: 2px;
         border-color: black;
@@ -57,7 +56,6 @@
         width: 30%;
       }
       #about {
-        display: inline-block;
         border-style: solid;
         border-width: 2px;
         border-color: black;
@@ -133,7 +131,7 @@
 
     let name = window.localStorage.getItem("name");
     if (name) {
-      setTimeout(() => on_name_change(name), 1000);
+      setTimeout(() => on_name_change(name), 10000);
       document.querySelector("#name").value = name;
     }
 
