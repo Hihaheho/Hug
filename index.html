@@ -1,6 +1,19 @@
 <html>
   <head>
     <meta charset="UTF-8" />
+    <meta property="og:title" content="Hug with me?">
+    <meta property="og:site_name" content="The Hug Game">
+    <meta property="og:url" content="https://hug.hihaheho.com">
+    <meta property="og:description" content="Hug friends remotely.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="/hug.png">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@HihahehoStudio">
+    <meta name="twitter:description" content="Hug friends remotely.">
+    <meta name="twitter:title" content="The Hug Game">
+    <meta name="twitter:image" content="/hug.png">
+
+
     <style>
       @font-face {
         font-family: 'DotGothic';
@@ -85,7 +98,7 @@
     <div id="buttons">
       <a id="about" href="https://hihaheho.com/hug"></a>
       <a class="button" id="random">Random</a>
-      <a class="button" id="room">Invite</a>
+      <a class="button" id="room">Friend</a>
       <a class="button" id="share">Share</a>
       <input id="name" type="text" placeholder="Name" />
       <p id="message"></p>
@@ -148,6 +161,19 @@
     document.is_iphone = navigator.platform == 'iPhone' || (navigator.userAgent.indexOf('Mac') != -1 && window.is_mobile);
 
     document.querySelector("#name").focus
+
+    // If key pressed and not focused on the name input, then focus the canvas.
+    let name_focus = false;
+    let name_input = document.querySelector("#name");
+    name_input.addEventListener("blur", () => {name_focus = false});
+    name_input.addEventListener("focus", () => {name_focus = true});
+    window.onkeypress = (event) => {
+      console.log(event);
+      let canvas = document.querySelector("canvas");
+      if (canvas && !name_focus) {
+        canvas.focus()
+      }
+    };
 
     init()
   </script>
