@@ -2,6 +2,10 @@
   <head>
     <meta charset="UTF-8" />
     <style>
+      @font-face {
+        font-family: 'DotGothic';
+        src: url('/assets/DotGothic16-Regular.ttf');
+      }
       html, body {
         padding: 0px;
         margin: 0px;
@@ -9,6 +13,7 @@
       }
       body {
         z-index: 1;
+        font-family: 'DotGothic', sans-serif;
       }
 			canvas {
         position: absolute;
@@ -21,10 +26,28 @@
         z-index: 3;
         width: 100%;
       }
-      button {
-        font-size: 2.7em;
+      .button {
+        position: relative;
+        top: 0px;
+        display: inline-block;
+        border-style: solid;
+        border-width: 2px;
+        border-color: black;
+        font-size: 30px;
         text-align: center;
         display: inline-block;
+        font-family: 'DotGothic', sans-serif;
+        margin: 0px 0px;
+        padding: 0px 4px;
+        height: 64px;
+        line-height: 64px;
+        letter-spacing: 0px;
+      }
+      .button:hover {
+        border-color: white !important;
+      }
+      .button:active {
+        background-color: white !important;
       }
       #message, #alert {
         font-size: 2.7em;
@@ -34,7 +57,14 @@
         width: 30%;
       }
       #about {
-        font-size: 2.7em;
+        display: inline-block;
+        border-style: solid;
+        border-width: 2px;
+        border-color: black;
+        width: 64px;
+        height: 64px;
+        background-image: url('/logo.png');
+        background-size: contain;
       }
       #random, #room {
         background-color: #99ee77;
@@ -51,10 +81,10 @@
 			<p>iPhoneのSafariをお使いの方は、「iPhoneでWebGL2.0を有効にする方法」でググってください。</p>
 		</div>
     <div id="buttons">
-      <a id="about" href="https://hihaheho.com/hug">About</a>
-      <button id="random">Random</button>
-      <button id="room">Invite</button>
-      <button id="share">Share</button>
+      <a id="about" href="https://hihaheho.com/hug"></a>
+      <a class="button" id="random">Random</a>
+      <a class="button" id="room">Invite</a>
+      <a class="button" id="share">Share</a>
       <input id="name" type="text" placeholder="Name" />
       <p id="message"></p>
       <p id="alert"></p>
@@ -96,8 +126,16 @@
     document.querySelector("#random").onclick = () => on_click_random();
     document.querySelector("#room").onclick = () => on_click_room();
     document.querySelector("#share").onclick = () => on_click_share();
-    document.querySelector("#name").oninput = (event) =>
+    document.querySelector("#name").oninput = (event) => {
+      window.localStorage.setItem("name", event.target.value);
       on_name_change(event.target.value);
+    }
+
+    let name = window.localStorage.getItem("name");
+    if (name) {
+      setTimeout(() => on_name_change(name), 1000);
+      document.querySelector("#name").value = name;
+    }
 
     // https://stackoverflow.com/questions/7995752/detect-desktop-browser-not-mobile-with-javascript#comment106045591_16156769
     document.is_mobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
