@@ -8,7 +8,6 @@ use crate::{
         physics::{Joint, JointMotorParams},
         player::{Player, Player1, Player2},
     },
-    WIDTH,
 };
 
 pub fn touch_input(

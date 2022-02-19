@@ -12,6 +12,8 @@ use crate::components::{
     ragdoll::BallonForceCoef,
 };
 
+pub const PLAYER2_COLOR: Color = Color::rgb(0.2, 0.2, 0.7);
+
 pub fn setup_player(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -32,7 +34,7 @@ pub fn setup_player(
         &mut materials,
         Body::player2(),
         Transform::from_translation(Vec3::new(0.0, 0.0, -0.2)),
-        Color::rgb(0.2, 0.2, 0.7),
+        PLAYER2_COLOR,
     );
 }
 

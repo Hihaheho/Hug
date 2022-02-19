@@ -5,10 +5,10 @@ mod systems;
 
 use bevy::prelude::*;
 
+#[cfg(not(target_arch = "wasm32"))]
 use bevy_inspector_egui::WorldInspectorPlugin;
 use bevy_rapier3d::prelude::*;
 use js_sys::Function;
-use parking_lot::Mutex;
 use plugins::body::BodyPlugin;
 use wasm_bindgen::prelude::*;
 

@@ -1,12 +1,15 @@
-use bevy::{prelude::*, render::wireframe::Wireframe};
-use bevy_rapier3d::prelude::{RigidBodyActivation, RigidBodyType, RigidBodyTypeComponent};
+use bevy::prelude::*;
+use bevy_rapier3d::prelude::{RigidBodyType, RigidBodyTypeComponent};
 
-use crate::components::{
-    body::part::Head,
-    control::HandControl,
-    networking::{ElapsedTime, HugCommand, Payload, PlayerName, Sender},
-    player::{Player1, Player2},
-    ui::Message,
+use crate::{
+    components::{
+        body::part::Head,
+        control::HandControl,
+        networking::{ElapsedTime, HugCommand, Payload, PlayerName, Sender},
+        player::{Player1, Player2},
+        ui::Message,
+    },
+    systems::setup_player::PLAYER2_COLOR,
 };
 
 pub fn random_matching(mut sender: ResMut<Sender>, mut message: ResMut<Message>) {
@@ -30,6 +33,7 @@ pub fn cleanup(
     time.0 = Default::default();
     let material = materials.get_mut(head.single().unwrap()).unwrap();
     material.unlit = true;
+    material.base_color = Color::rgb(0.5, 0.5, 0.9);
 }
 
 pub fn on_connected(
@@ -38,7 +42,6 @@ pub fn on_connected(
     name: Res<PlayerName<Player1>>,
     mut control: ResMut<HandControl<Player1>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    mut query: Query<&mut RigidBodyTypeComponent, With<Player2>>,
     head: Query<&Handle<StandardMaterial>, (With<Player2>, With<Head>)>,
 ) {
     sender.0.push(HugCommand::Push {
@@ -47,7 +50,5 @@ pub fn on_connected(
     *control = HandControl::default();
     let material = materials.get_mut(head.single().unwrap()).unwrap();
     material.unlit = false;
-    for mut rigid_body_type in query.iter_mut() {
-        rigid_body_type.0 = RigidBodyType::Dynamic;
-    }
+    material.base_color = PLAYER2_COLOR;
 }
