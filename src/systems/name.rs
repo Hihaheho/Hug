@@ -10,53 +10,37 @@ use crate::components::{
     player::{NameText, Player},
 };
 
-pub fn load_font(mut commands: Commands, mut fonts: ResMut<Assets<Font>>) {
-    let font = fonts.add(
-        Font::try_from_bytes(
-            include_bytes!("../../assets/NotoSansJP-Black.otf")
-                .into_iter()
-                .cloned()
-                .collect(),
-        )
-        .unwrap(),
-    );
-    commands.insert_resource(font);
-}
-
 pub fn insert_name<P: Player, const LEFT: bool>(
     mut commands: Commands,
     name: Res<PlayerName<P>>,
-    font: Res<Handle<Font>>,
     asset_server: ResMut<AssetServer>,
 ) {
-    if font.is_added() {
-        commands
-            .spawn_bundle(TextBundle {
-                style: Style {
-                    position_type: PositionType::Absolute,
-                    position: Rect {
-                        ..Default::default()
-                    },
+    commands
+        .spawn_bundle(TextBundle {
+            style: Style {
+                position_type: PositionType::Absolute,
+                position: Rect {
                     ..Default::default()
                 },
-                text: Text::with_section(
-                    // Accepts a `String` or any type that converts into a `String`, such as `&str`
-                    name.0.clone(),
-                    TextStyle {
-                        font: asset_server.load("NotoSansJP-Black.otf"),
-                        font_size: 70.0,
-                        color: Color::BLACK,
-                    },
-                    TextAlignment {
-                        horizontal: HorizontalAlign::Center,
-                        ..Default::default()
-                    },
-                ),
                 ..Default::default()
-            })
-            .insert(NameText)
-            .insert(P::default());
-    }
+            },
+            text: Text::with_section(
+                // Accepts a `String` or any type that converts into a `String`, such as `&str`
+                name.0.clone(),
+                TextStyle {
+                    font: asset_server.load("DotGothic16-Regular.ttf"),
+                    font_size: 70.0,
+                    color: Color::BLACK,
+                },
+                TextAlignment {
+                    horizontal: HorizontalAlign::Center,
+                    ..Default::default()
+                },
+            ),
+            ..Default::default()
+        })
+        .insert(NameText)
+        .insert(P::default());
 }
 
 pub fn update_name<P: Player>(
@@ -84,13 +68,14 @@ pub fn update_name_position<P: Player, Part: BodyPart, const LEFT: bool>(
                     head.0.position.translation.y,
                     head.0.position.translation.z,
                 );
-                let vec = camera.world_to_screen(&windows, &transform, vec).unwrap();
-                name.position.bottom = Val::Px(vec.y);
-                if LEFT {
-                    name.position.left = Val::Px(vec.x);
-                } else {
-                    let window = windows.get_primary().unwrap();
-                    name.position.left = Val::Px(vec.x - window.width() * 0.3);
+                if let Some(vec) = camera.world_to_screen(&windows, &transform, vec) {
+                    name.position.bottom = Val::Px(vec.y);
+                    if LEFT {
+                        name.position.left = Val::Px(vec.x);
+                    } else {
+                        let window = windows.get_primary().unwrap();
+                        name.position.left = Val::Px(vec.x - window.width() * 0.3);
+                    }
                 }
             }
         }
