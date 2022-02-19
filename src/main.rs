@@ -34,7 +34,10 @@ fn main() {
     let mut app = App::build();
 
     let mut win = WindowDescriptor::default();
-    win.scale_factor_override = Some(1.0);
+    #[cfg(target_arch = "wasm32")]
+    {
+        win.scale_factor_override = Some(1.0);
+    }
     let mut device = Device::Desktop;
     #[cfg(target_arch = "wasm32")]
     {

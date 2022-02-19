@@ -18,7 +18,7 @@ pub fn touch_input(
     windows: Res<Windows>,
 ) {
     if let Some(window) = windows.get_primary() {
-        let width = window.width() * desc.scale_factor_override.unwrap() as f32;
+        let width = window.width() * window.scale_factor() as f32;
         for touch in touches.iter() {
             let delta = touch.delta();
             let delta = Vec2::new(delta.x / (width / 5.0), delta.y / (width / 2.0));
