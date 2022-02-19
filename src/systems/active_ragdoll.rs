@@ -1,37 +1,27 @@
 use bevy::prelude::*;
-use bevy_rapier3d::{prelude::*};
+use bevy_rapier3d::prelude::*;
 
 use crate::components::{
-    body::{part::*, PlayerBody},
+    body::{part::*, BodyPart, PlayerBody},
     player::Player,
+    ragdoll::BallonForceCoef,
 };
 
-pub fn head_baloon_system<T: Player>(
+pub fn baloon_system<T: Player, P: BodyPart>(
     body: Res<PlayerBody<T>>,
     mut head: Query<
-        (&mut RigidBodyForcesComponent, &RigidBodyPositionComponent),
-        (With<T>, With<Head>),
+        (
+            &mut RigidBodyForcesComponent,
+            &RigidBodyPositionComponent,
+            &BallonForceCoef,
+        ),
+        (With<T>, With<P>),
     >,
 ) {
-    for (mut forces, pos) in head.iter_mut() {
+    for (mut forces, pos, coef) in head.iter_mut() {
         let t = pos.position.translation;
-        let diff = body.absolute.get::<Head>().translation - Vec3::new(t.x, t.y, t.z);
-		let force = 3.0 * diff;
-        forces.force += vector!(force.x, force.y, force.z);
-    }
-}
-
-pub fn hip_baloon_system<T: Player>(
-    body: Res<PlayerBody<T>>,
-    mut head: Query<
-        (&mut RigidBodyForcesComponent, &RigidBodyPositionComponent),
-        (With<T>, With<Hip>),
-    >,
-) {
-    for (mut forces, pos) in head.iter_mut() {
-        let t = pos.position.translation;
-        let diff = body.absolute.get::<Hip>().translation - Vec3::new(t.x, t.y, t.z);
-		let force = 3.0 * diff;
+        let diff = body.absolute.get::<P>().translation - Vec3::new(t.x, t.y, t.z);
+        let force = coef.0 * diff;
         forces.force += vector!(force.x, force.y, force.z);
     }
 }

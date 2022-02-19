@@ -1,6 +1,8 @@
 use bevy::{prelude::*, render::wireframe::Wireframe};
+use bevy_rapier3d::prelude::{RigidBodyActivation, RigidBodyType, RigidBodyTypeComponent};
 
 use crate::components::{
+    body::part::Head,
     control::HandControl,
     networking::{ElapsedTime, HugCommand, Payload, PlayerName, Sender},
     player::{Player1, Player2},
@@ -20,23 +22,14 @@ pub fn cleanup(
     mut name: ResMut<PlayerName<Player2>>,
     mut control: ResMut<HandControl<Player2>>,
     mut time: ResMut<ElapsedTime>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    head: Query<&Handle<StandardMaterial>, (With<Player2>, With<Head>)>,
 ) {
     name.0 = "".into();
     *control = HandControl::default_absent();
     time.0 = Default::default();
-}
-
-pub fn alone(
-    mut commands: Commands,
-    mut message: ResMut<Message>,
-    mut control: ResMut<HandControl<Player2>>,
-    query: Query<Entity, (With<Player2>, With<Handle<Mesh>>)>,
-) {
-    message.0 = "You are alone in this room. Click Random to find someone or Invite to hug with your friend.".into();
-    *control = HandControl::default_absent();
-    for entity in query.iter() {
-        commands.entity(entity).insert(Wireframe);
-    }
+    let material = materials.get_mut(head.single().unwrap()).unwrap();
+    material.unlit = true;
 }
 
 pub fn on_connected(
@@ -44,13 +37,17 @@ pub fn on_connected(
     mut sender: ResMut<Sender>,
     name: Res<PlayerName<Player1>>,
     mut control: ResMut<HandControl<Player1>>,
-    query: Query<Entity, (With<Player2>, With<Handle<Mesh>>)>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut query: Query<&mut RigidBodyTypeComponent, With<Player2>>,
+    head: Query<&Handle<StandardMaterial>, (With<Player2>, With<Head>)>,
 ) {
     sender.0.push(HugCommand::Push {
         payload: Payload::Name(name.0.clone()),
     });
     *control = HandControl::default();
-    for entity in query.iter() {
-        commands.entity(entity).remove::<Wireframe>();
+    let material = materials.get_mut(head.single().unwrap()).unwrap();
+    material.unlit = false;
+    for mut rigid_body_type in query.iter_mut() {
+        rigid_body_type.0 = RigidBodyType::Dynamic;
     }
 }

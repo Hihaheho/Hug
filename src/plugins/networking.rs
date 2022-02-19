@@ -1,11 +1,14 @@
 use std::time::Duration;
 
 use bevy::prelude::*;
+use bevy_rapier3d::prelude::{RigidBodyType, RigidBodyTypeComponent};
 
 use crate::{
     components::{
         networking::{ElapsedTime, IsPrimary, PushTimer, Receiver, Sender, SyncTimer},
+        player::Player2,
         state::AppState,
+        ui::Message,
     },
     systems::networking::{
         elapse_time, event_handlers, handle_event::handle_events, join_room, sync, transport,
@@ -62,12 +65,23 @@ impl Plugin for NetworkPlugin {
                     .with_system(event_handlers::cleanup.system()),
             )
             .add_system_set(
-                SystemSet::on_enter(AppState::Alone).with_system(event_handlers::alone.system()),
+                SystemSet::on_enter(AppState::Alone).with_system(event_handlers::cleanup.system()),
             )
             .add_system(
                 elapse_time
                     .system()
                     .with_run_criteria(when_connect.system()),
-            );
+            )
+            .add_startup_system(alone.system());
+    }
+}
+
+pub fn alone(
+    mut message: ResMut<Message>,
+    mut query: Query<&mut RigidBodyTypeComponent, With<Player2>>,
+) {
+    message.0 = "You are alone in this room. Click Random to find someone or Invite to hug with your friend.".into();
+    for mut rigid_body_type in query.iter_mut() {
+        rigid_body_type.0 = RigidBodyType::Static;
     }
 }

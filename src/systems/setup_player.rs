@@ -9,6 +9,7 @@ use crate::components::{
     control::HandControl,
     physics::{CollisionTag, Joint, JointMotorParams},
     player::{Player, Player1, Player2},
+    ragdoll::BallonForceCoef,
 };
 
 pub fn setup_player(
@@ -168,6 +169,10 @@ fn create_player<T: Player + Copy>(
         foot_right,
         leg_mesh::<T>,
     );
+
+    // ballon force
+    commands.entity(head).insert(BallonForceCoef(3.0));
+    commands.entity(hip).insert(BallonForceCoef(3.0));
 
     // PlayerBody
     commands.insert_resource(body);

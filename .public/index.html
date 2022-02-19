@@ -149,6 +149,19 @@
 
     document.querySelector("#name").focus
 
+    // If key pressed and not focused on the name input, then focus the canvas.
+    let name_focus = false;
+    let name_input = document.querySelector("#name");
+    name_input.addEventListener("blur", () => {name_focus = false});
+    name_input.addEventListener("focus", () => {name_focus = true});
+    window.onkeypress = (event) => {
+      console.log(event);
+      let canvas = document.querySelector("canvas");
+      if (canvas && !name_focus) {
+        canvas.focus()
+      }
+    };
+
     init()
   </script>
 </html>

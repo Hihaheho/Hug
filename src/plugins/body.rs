@@ -7,7 +7,7 @@ use crate::{
         player::{Player1, Player2},
     },
     systems::{
-        active_ragdoll::{hand_baloon_system, head_baloon_system, hip_baloon_system},
+        active_ragdoll::{baloon_system, hand_baloon_system},
         control::{angular_spring_system, keyboard_input, move_system, move_system2, touch_input},
     },
     HugSystems,
@@ -33,12 +33,12 @@ impl Plugin for BodyPlugin {
         .add_system_set(
             SystemSet::new()
                 .before(PhysicsSystems::StepWorld)
-                .with_system(head_baloon_system::<Player1>.system())
+                .with_system(baloon_system::<Player1, Head>.system())
+                .with_system(baloon_system::<Player1, Hip>.system())
                 .with_system(hand_baloon_system::<Player1>.system())
-                .with_system(hip_baloon_system::<Player1>.system())
-                .with_system(head_baloon_system::<Player2>.system())
+                .with_system(baloon_system::<Player2, Head>.system())
+                .with_system(baloon_system::<Player2, Hip>.system())
                 .with_system(hand_baloon_system::<Player2>.system())
-                .with_system(hip_baloon_system::<Player2>.system())
                 .with_system(angular_spring_system::<Player1, UpperArmLeft, ForearmLeft>.system())
                 .with_system(angular_spring_system::<Player1, ForearmLeft, HandLeft>.system())
                 .with_system(angular_spring_system::<Player1, UpperArmRight, ForearmRight>.system())
