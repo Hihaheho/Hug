@@ -7,6 +7,7 @@ use bevy::prelude::*;
 
 use bevy_inspector_egui::WorldInspectorPlugin;
 use bevy_rapier3d::prelude::*;
+use js_sys::Function;
 use parking_lot::Mutex;
 use plugins::body::BodyPlugin;
 use wasm_bindgen::prelude::*;
@@ -33,11 +34,15 @@ fn main() {
     let mut app = App::build();
 
     let mut win = WindowDescriptor::default();
+    win.scale_factor_override = Some(1.0);
     let mut device = Device::Desktop;
     #[cfg(target_arch = "wasm32")]
     {
-        win.scale_factor_override = Some(1.0);
         let document = web_sys::window().unwrap().document().unwrap();
+        let on_load =
+            Function::from(unsafe { js_sys::Reflect::get(&document, &"on_load".into()).unwrap() });
+        on_load.call0(&JsValue::NULL);
+
         let is_iphone = unsafe { js_sys::Reflect::get(&document, &"is_iphone".into()).unwrap() };
         if !is_iphone.is_falsy() {
             let js_window = web_sys::window().unwrap();
