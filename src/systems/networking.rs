@@ -10,7 +10,7 @@ use crate::components::{
     networking::{ElapsedTime, HugCommand, PlayerName, Sender},
     player::Player1,
     state::AppState,
-    ui::Message,
+    ui::{Message, Messages},
 };
 
 lazy_static::lazy_static! {
@@ -34,12 +34,13 @@ pub fn join_room(
     mut sender: ResMut<Sender>,
     mut state: ResMut<State<AppState>>,
     mut message: ResMut<Message>,
+    messages: ResMut<Messages>,
 ) {
     let window = web_sys::window().unwrap();
     let storage = window.local_storage().unwrap().unwrap();
     if let Ok(Some(key)) = storage.get_item("key") {
         if key.len() != 0 {
-            message.0 = "Joining the room".into();
+            message.0 = messages.finding_room.into();
             sender.0.push(HugCommand::JoinRoom { key });
             let _ = state.set(AppState::MatchingByKey);
         }

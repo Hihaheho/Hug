@@ -2,11 +2,16 @@ use std::ops::DerefMut;
 
 use web_sys::ShareData;
 
-use crate::components::ui::Alert;
+use crate::components::ui::{Alert, Messages};
 
-pub fn navigator_share(text: &str, url: &str, alert: &mut impl DerefMut<Target = Alert>) {
+pub fn navigator_share(
+    text: &str,
+    url: &str,
+    alert: &mut impl DerefMut<Target = Alert>,
+    messages: &Messages,
+) {
     unsafe {
-        let text = &format!("{} #metaverse #thehug", text);
+        let text = &format!("{} {}", text, messages.tags);
         let url = &format!("https://hug.hihaheho.com{}", url);
 
         let window = web_sys::window().unwrap();
@@ -27,7 +32,7 @@ pub fn navigator_share(text: &str, url: &str, alert: &mut impl DerefMut<Target =
         {
             let _ = navigator.share(data);
         } else {
-            alert.0 = "Copied to clipboard".into();
+            alert.0 = messages.copied.into();
         }
     }
 }

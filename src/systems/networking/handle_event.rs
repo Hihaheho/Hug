@@ -9,12 +9,12 @@ use crate::{
         networking::{HugEvent, IsPrimary, Payload, PlayerName, Receiver},
         player::{Player1, Player2},
         state::AppState,
-        ui::{Alert, Message},
+        ui::{Alert, Message, Messages},
     },
 };
 
 pub fn handle_events(
-    receiver: Res<Receiver>,
+    receiver: (Res<Receiver>, Res<Messages>),
     mut state: ResMut<State<AppState>>,
     mut control: ResMut<HandControl<Player2>>,
     mut message: ResMut<Message>,
@@ -31,10 +31,11 @@ pub fn handle_events(
     player1_hand_right_q: Query<Entity, (With<Player1>, With<HandRight>)>,
     player2_hand_right_q: Query<Entity, (With<Player2>, With<HandRight>)>,
 ) {
+    let (receiver, messages) = receiver;
     for event in receiver.0.iter() {
         match event {
             HugEvent::Joined { is_primary } => {
-                message.0 = "Ready to hug".into();
+                message.0 = messages.ready.into();
                 let _ = state.set(AppState::Connected);
                 *is_primary_res = if *is_primary {
                     IsPrimary::Yes
@@ -43,13 +44,12 @@ pub fn handle_events(
                 };
             }
             HugEvent::RoomCreated { key } => unsafe {
-                web_sys::console::log_1(&format!("Room created: {}", key).into());
                 let url = &format!("?key={}", key);
-                navigator_share("Hug with Me?", url, &mut alert);
-                message.0 = "Room created share the url to your friends".into();
+                navigator_share(messages.room_link, url, &mut alert, &messages);
+                message.0 = messages.room_created.into();
             },
             HugEvent::NotFound => {
-                alert.0 = "Room not found".into();
+                alert.0 = messages.room_notfound.into();
             }
             HugEvent::Push { payload } => match payload {
                 Payload::HandControl { left, right } => {

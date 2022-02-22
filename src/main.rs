@@ -12,7 +12,10 @@ use js_sys::Function;
 use plugins::body::BodyPlugin;
 use wasm_bindgen::prelude::*;
 
-use components::{state::AppState, ui::Device};
+use components::{
+    state::AppState,
+    ui::{Device, Messages},
+};
 #[cfg(target_arch = "wasm32")]
 use plugins::{networking::NetworkPlugin, ui::UiPlugin};
 use systems::{scene::setup, setup_player::setup_player};
@@ -39,9 +42,22 @@ fn main() {
         win.scale_factor_override = Some(1.0);
     }
     let mut device = Device::Desktop;
+    let mut messages = Messages {
+        finding: "Finding someone to hug.",
+        room_created: "Room created share the url to your friends",
+        ready: "Ready to hug",
+        finding_room: "Joining the room",
+        room_notfound: "Room key it used or closed yet.",
+        copied: "Copied to clipboard",
+        share: "The Hug game is amazing! Try it out!",
+        share_match: "With {name}, we've hugged for {minute} minutes and {second} seconds.",
+        room_link: "Hug with Me?",
+        tags: "#metaverse #thehuggame",
+    };
     #[cfg(target_arch = "wasm32")]
     {
-        let document = web_sys::window().unwrap().document().unwrap();
+        let window = web_sys::window().unwrap();
+        let document = window.document().unwrap();
         let on_load =
             Function::from(unsafe { js_sys::Reflect::get(&document, &"on_load".into()).unwrap() });
         on_load.call0(&JsValue::NULL);
@@ -58,10 +74,29 @@ fn main() {
         if !is_mobile.is_falsy() {
             device = Device::Mobile;
         }
+        let navigator = window.navigator();
+        if let Some(language) = navigator.language() {
+            if language.starts_with("ja") {
+                messages = Messages {
+                    finding: "ハグの相手を探しています",
+                    room_created: "ルームを作成しました。リンクを友達に送ってください",
+                    ready: "ハグ開始！",
+                    finding_room: "ルームに参加中です",
+                    room_notfound: "ルームに入れませんでした",
+                    copied: "コピーしました！",
+                    share: "ハグゲームは最高です！みんなでハグしよう！",
+                    share_match:
+                        "{name}さんと{minute}分{second}秒ハグしました",
+                    room_link: "わたしとハグしませんか？",
+                    tags: "#メタバース #ハグゲーム",
+                };
+            }
+        }
     }
 
     app.insert_resource(win)
         .insert_resource(device)
+        .insert_resource(messages)
         .add_plugins(DefaultPlugins)
         .add_plugin(BodyPlugin)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())

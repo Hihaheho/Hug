@@ -7,14 +7,18 @@ use crate::{
         control::HandControl,
         networking::{ElapsedTime, HugCommand, Payload, PlayerName, Sender},
         player::{Player1, Player2},
-        ui::Message,
+        ui::{Message, Messages},
     },
     systems::setup_player::PLAYER2_COLOR,
 };
 
-pub fn random_matching(mut sender: ResMut<Sender>, mut message: ResMut<Message>) {
+pub fn random_matching(
+    mut sender: ResMut<Sender>,
+    mut message: ResMut<Message>,
+    messages: Res<Messages>,
+) {
     sender.0.push(HugCommand::JoinRandom);
-    message.0 = "Finding someone to hug.".into()
+    message.0 = messages.finding.into()
 }
 
 pub fn create_room(mut sender: ResMut<Sender>) {

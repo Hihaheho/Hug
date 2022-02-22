@@ -4,7 +4,7 @@ use crate::{
         networking::{ElapsedTime, PlayerName},
         player::Player2,
         state::AppState,
-        ui::{Alert, AlertTimer, Message},
+        ui::{Alert, AlertTimer, Message, Messages},
     },
 };
 
@@ -64,6 +64,7 @@ pub fn share(
     name: Res<PlayerName<Player2>>,
     mut alert: ResMut<Alert>,
     elapsed: Res<ElapsedTime>,
+    messages: Res<Messages>,
 ) {
     let mut button = SHARE_BUTTON.lock();
     if *button == true {
@@ -74,14 +75,15 @@ pub fn share(
             let seconds = elapsed.0.as_secs();
             let minutes = seconds / 60;
             let seconds = seconds % 60;
-            text = "With {name}, we've hugged for {minute} minutes and {second} seconds."
+            text = messages
+                .share_match
                 .to_string()
                 .replace("{name}", &name.0)
                 .replace("{minute}", &format!("{}", minutes))
                 .replace("{second}", &format!("{}", seconds));
         } else {
-            text = "The Hug game is amazing! Try it out!".to_string();
+            text = messages.share.to_string();
         }
-        navigator_share(&text, "", &mut alert);
+        navigator_share(&text, "", &mut alert, &messages);
     }
 }
