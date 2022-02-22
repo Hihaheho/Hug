@@ -4,15 +4,14 @@
     <meta property="og:title" content="Hug with me?">
     <meta property="og:site_name" content="The Hug Game">
     <meta property="og:url" content="https://hug.hihaheho.com">
-    <meta property="og:description" content="Hug friends remotely.">
+    <meta property="og:description" content="Hug your friends remotely.">
     <meta property="og:type" content="website">
     <meta property="og:image" content="https://hug.hihaheho.com/hug.png">
     <meta name="twitter:card" content="summary">
     <meta name="twitter:site" content="@HihahehoStudio">
-    <meta name="twitter:description" content="Hug friends remotely.">
+    <meta name="twitter:description" content="Hug your friends remotely.">
     <meta name="twitter:title" content="The Hug Game">
     <meta name="twitter:image" content="https://hug.hihaheho.com/hug.png">
-
 
     <style>
       @font-face {
@@ -34,62 +33,91 @@
 				height: 100% !important;
         z-index: 2;
 			}
+      #helpja, #helpen {
+        position: absolute;
+        z-index: 5;
+        width: 100%;
+        height: 100%;
+        background-color:#333;
+      }
+      img {
+        height: 100%;
+        width: 100%;
+        object-fit: contain;
+        opacity: 1.0;
+      }
       #buttons {
         position: absolute;
         z-index: 3;
         width: 100%;
-      }
-      .button {
-        display: block;
-        float: left;
-        border-style: solid;
-        border-width: 2px;
-        border-color: black;
-        font-size: 50px;
-        text-align: center;
-        display: inline-block;
-        font-family: 'DotGothic', sans-serif;
-        margin: 0px 0px;
-        padding: 0px 4px;
-        height: 128px;
-        line-height: 128px;
-      }
-      .button:hover {
-        border-color: white !important;
-      }
-      .button:active {
-        background-color: white !important;
       }
       #message, #alert {
         font-size: 2.7em;
       }
       #name {
         font-size: 2.7em;
-        width: 30%;
-        height: 132px;
+        float: right;
+        max-width: 30%;
+        height: 128px;
         font-size: 50px;
         font-family: 'DotGothic', sans-serif;
       }
       #about {
-        display: block;
-        float: left;
-        border-style: solid;
-        border-width: 2px;
-        border-color: black;
+        display: inline-block;
         width: 128px;
         height: 128px;
+        image-rendering: pixelated;
         background-image: url('/logo.png');
         background-size: contain;
       }
-      #random, #room {
-        background-color: #99ee77;
+      #random {
+        display: inline-block;
+        width: 128px;
+        width: 128px;
+        height: 128px;
+        image-rendering: pixelated;
+        background-image: url('/random.png');
+        background-size: contain;
+      }
+      #room {
+        display: inline-block;
+        width: 128px;
+        width: 128px;
+        height: 128px;
+        image-rendering: pixelated;
+        background-image: url('/friend.png');
+        background-size: contain;
       }
       #share {
-        background-color: #7799ee;
+        display: inline-block;
+        width: 128px;
+        width: 128px;
+        height: 128px;
+        image-rendering: pixelated;
+        background-image: url('/share.png');
+        background-size: contain;
+      }
+      #help {
+        display: inline-block;
+        width: 128px;
+        width: 128px;
+        height: 128px;
+        image-rendering: pixelated;
+        background-image: url('/help.png');
+        background-size: contain;
       }
     </style>
   </head>
-
+  <script>
+    function toggleHelpEn() {
+      let help = document.querySelector('#helpen');
+      help.style.display = help.style.display == 'none' ? 'flex' : 'none';
+    }
+    function toggleHelpJa() {
+      let help = document.querySelector('#helpja');
+      help.style.display = help.style.display == 'none' ? 'flex' : 'none';
+    }
+  </script>
   <body>
 		<div id="iphone">
 			<p>If you're using Safari on iPhone, please google how to enable WebGL2.0 on iPhone.</p>
@@ -97,12 +125,19 @@
 		</div>
     <div id="buttons">
       <a id="about" href="https://hihaheho.com/hug"></a>
-      <a class="button" id="random">Random</a>
-      <a class="button" id="room">Friend</a>
-      <a class="button" id="share">Share</a>
+      <a id="random"></a>
+      <a id="room"></a>
+      <a id="share"></a>
+      <a id="help"></a>
       <input id="name" type="text" placeholder="Name" />
       <p id="message"></p>
       <p id="alert"></p>
+    </div>
+    <div id="helpen" onclick="toggleHelpEn()" style="display: none;">
+      <img src="/helpen.png" />
+    </div>
+    <div id="helpja" onclick="toggleHelpJa()" style="display: none;">
+      <img src="/helpja.png" />
     </div>
   </body>
 
@@ -174,6 +209,23 @@
         canvas.focus()
       }
     };
+
+    if (localStorage.getItem("first") != "false") {
+      localStorage.setItem("first", "false");
+      if (navigator.language.startsWith("ja")) {
+        toggleHelpJa();
+      } else {
+        toggleHelpEn();
+      }
+    }
+
+    document.querySelector("#help").onclick = () => {
+      if (navigator.language.startsWith("ja")) {
+        toggleHelpJa();
+      } else {
+        toggleHelpEn();
+      }
+    }
 
     init()
   </script>

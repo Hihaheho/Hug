@@ -71,17 +71,6 @@ impl Plugin for NetworkPlugin {
                 elapse_time
                     .system()
                     .with_run_criteria(when_connect.system()),
-            )
-            .add_startup_system(alone.system());
-    }
-}
-
-pub fn alone(
-    mut message: ResMut<Message>,
-    mut query: Query<&mut RigidBodyTypeComponent, With<Player2>>,
-) {
-    message.0 = "You are alone in this room. Click Random to find someone or Friend to hug with your friend.".into();
-    for mut rigid_body_type in query.iter_mut() {
-        rigid_body_type.0 = RigidBodyType::Static;
+            );
     }
 }
