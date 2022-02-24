@@ -5,14 +5,14 @@ use bevy_rapier3d::prelude::{RigidBodyType, RigidBodyTypeComponent};
 
 use crate::{
     components::{
-        networking::{ElapsedTime, IsPrimary, PushTimer, Receiver, Sender, SyncTimer},
+        networking::{ElapsedTime, IsPrimary, PushTimer, Receiver, Sender, SyncTimer, WaitTimer},
         player::Player2,
         state::AppState,
         ui::Message,
     },
     systems::networking::{
-        elapse_time, event_handlers, handle_event::handle_events, join_room, sync, transport,
-        update_name, when_connect,
+        back_to_alone, elapse_time, event_handlers, handle_event::handle_events, join_room, sync,
+        transport, update_name, when_connect,
     },
     HugSystems,
 };
@@ -25,6 +25,7 @@ impl Plugin for NetworkPlugin {
             .insert_resource(Receiver(Vec::new()))
             .insert_resource(PushTimer(Timer::from_seconds(1.0 / 20.0, true)))
             .insert_resource(SyncTimer(Timer::from_seconds(1.0, true)))
+            .insert_resource(WaitTimer(Timer::from_seconds(30.0, false)))
             .insert_resource(ElapsedTime(Duration::default()))
             .insert_resource(IsPrimary::No)
             .add_startup_system(join_room.system())
@@ -71,6 +72,7 @@ impl Plugin for NetworkPlugin {
                 elapse_time
                     .system()
                     .with_run_criteria(when_connect.system()),
-            );
+            )
+            .add_system(back_to_alone.system());
     }
 }

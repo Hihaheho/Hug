@@ -48,6 +48,7 @@ pub struct Sender(pub Vec<HugCommand>);
 
 pub struct PushTimer(pub Timer);
 pub struct SyncTimer(pub Timer);
+pub struct WaitTimer(pub Timer);
 
 #[derive(PartialEq, Eq)]
 pub enum IsPrimary {

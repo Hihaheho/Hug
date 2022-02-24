@@ -7,7 +7,7 @@ use bevy::{ecs::schedule::ShouldRun, prelude::*};
 use parking_lot::Mutex;
 
 use crate::components::{
-    networking::{ElapsedTime, HugCommand, PlayerName, Sender},
+    networking::{ElapsedTime, HugCommand, PlayerName, Sender, WaitTimer},
     player::Player1,
     state::AppState,
     ui::{Message, Messages},
@@ -56,4 +56,16 @@ pub fn update_name(mut name: ResMut<PlayerName<Player1>>) {
 
 pub fn elapse_time(mut elapsed_time: ResMut<ElapsedTime>, time: Res<Time>) {
     elapsed_time.0 += time.delta();
+}
+
+pub fn back_to_alone(
+    mut wait_timer: ResMut<WaitTimer>,
+    time: Res<Time>,
+    mut state: ResMut<State<AppState>>,
+    mut message: ResMut<Message>,
+) {
+    if wait_timer.0.tick(time.delta()).just_finished() {
+        let _ = state.set(AppState::Alone);
+        message.0 = "".into();
+    }
 }

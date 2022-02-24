@@ -5,7 +5,7 @@ use crate::{
     components::{
         body::part::Head,
         control::HandControl,
-        networking::{ElapsedTime, HugCommand, Payload, PlayerName, Sender},
+        networking::{ElapsedTime, HugCommand, Payload, PlayerName, Sender, WaitTimer},
         player::{Player1, Player2},
         ui::{Message, Messages},
     },
@@ -15,14 +15,17 @@ use crate::{
 pub fn random_matching(
     mut sender: ResMut<Sender>,
     mut message: ResMut<Message>,
+    mut wait_timer: ResMut<WaitTimer>,
     messages: Res<Messages>,
 ) {
     sender.0.push(HugCommand::JoinRandom);
-    message.0 = messages.finding.into()
+    message.0 = messages.finding.into();
+    wait_timer.0.reset();
 }
 
-pub fn create_room(mut sender: ResMut<Sender>) {
+pub fn create_room(mut sender: ResMut<Sender>, mut wait_timer: ResMut<WaitTimer>) {
     sender.0.push(HugCommand::CreateRoom);
+    wait_timer.0.reset();
 }
 
 pub fn cleanup(
