@@ -64,7 +64,7 @@ pub fn back_to_alone(
     mut state: ResMut<State<AppState>>,
     mut message: ResMut<Message>,
 ) {
-    if wait_timer.0.tick(time.delta()).just_finished() {
+    if *state.current() != AppState::Connected && wait_timer.0.tick(time.delta()).just_finished() {
         let _ = state.set(AppState::Alone);
         message.0 = "".into();
     }
