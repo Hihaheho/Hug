@@ -1,249 +1,269 @@
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <meta property="og:title" content="Hug with me?">
-    <meta property="og:site_name" content="The Hug Game">
-    <meta property="og:url" content="https://hug.hihaheho.com">
-    <meta property="og:description" content="Hug your friends remotely.">
-    <meta property="og:type" content="website">
-    <meta property="og:image" content="https://hug.hihaheho.com/hug.png">
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:site" content="@HihahehoStudio">
-    <meta name="twitter:description" content="Hug your friends remotely.">
-    <meta name="twitter:title" content="The Hug Game">
-    <meta name="twitter:image" content="https://hug.hihaheho.com/hug.png">
-    <meta name="theme-color" content="#ffccd3">
-    <!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
 
-    <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512x512.png">
-    <link rel="manifest" href="/manifest.webmanifest">
+<head>
+  <meta charset="UTF-8" />
+  <meta property="og:title" content="Hug with me?">
+  <meta property="og:site_name" content="The Hug Game">
+  <meta property="og:url" content="https://hug.hihaheho.com">
+  <meta property="og:description" content="Hug your friends remotely.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://hug.hihaheho.com/hug.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@HihahehoStudio">
+  <meta name="twitter:description" content="Hug your friends remotely.">
+  <meta name="twitter:title" content="The Hug Game">
+  <meta name="twitter:image" content="https://hug.hihaheho.com/hug.png">
+  <meta name="theme-color" content="#ffccd3">
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
 
-    <style>
-      @font-face {
-        font-family: 'DotGothic';
-        src: url('/assets/DotGothic16-Regular.ttf');
-      }
-      html, body {
-        padding: 0px;
-        margin: 0px;
-        touch-action: none;
-      }
-      body {
-        z-index: 1;
-        font-family: 'DotGothic', sans-serif;
-      }
-			canvas {
-        position: absolute;
-				width: 100% !important;
-				height: 100% !important;
-        z-index: 2;
-			}
-      #helpja, #helpen {
-        position: absolute;
-        z-index: 5;
-        width: 100%;
-        height: 100%;
-        background-color:#333;
-      }
-      img {
-        height: 100%;
-        width: 100%;
-        object-fit: contain;
-        opacity: 1.0;
-      }
-      #buttons {
-        position: absolute;
-        z-index: 3;
-        width: 100%;
-      }
-      #message, #alert {
-        font-size: 2.7em;
-      }
-      #name {
-        font-size: 2.7em;
-        float: right;
-        max-width: 30%;
-        height: 128px;
-        font-size: 50px;
-        font-family: 'DotGothic', sans-serif;
-      }
-      #about {
-        display: inline-block;
-        width: 128px;
-        height: 128px;
-        image-rendering: pixelated;
-        background-image: url('/logo.png');
-        background-size: contain;
-      }
-      #random {
-        display: inline-block;
-        width: 128px;
-        width: 128px;
-        height: 128px;
-        image-rendering: pixelated;
-        background-image: url('/random.png');
-        background-size: contain;
-      }
-      #room {
-        display: inline-block;
-        width: 128px;
-        width: 128px;
-        height: 128px;
-        image-rendering: pixelated;
-        background-image: url('/friend.png');
-        background-size: contain;
-      }
-      #share {
-        display: inline-block;
-        width: 128px;
-        width: 128px;
-        height: 128px;
-        image-rendering: pixelated;
-        background-image: url('/share.png');
-        background-size: contain;
-      }
-      #help {
-        display: inline-block;
-        width: 128px;
-        width: 128px;
-        height: 128px;
-        image-rendering: pixelated;
-        background-image: url('/help.png');
-        background-size: contain;
-      }
-    </style>
-  </head>
-  <script>
-    function toggleHelpEn() {
-      let help = document.querySelector('#helpen');
-      help.style.display = help.style.display == 'none' ? 'flex' : 'none';
-    }
-    function toggleHelpJa() {
-      let help = document.querySelector('#helpja');
-      help.style.display = help.style.display == 'none' ? 'flex' : 'none';
-    }
-  </script>
-  <body>
-		<div id="iphone">
-			<p>If you're using Safari on iPhone, please google how to enable WebGL2.0 on iPhone.</p>
-			<p>iPhoneのSafariをお使いの方は、「iPhoneでWebGL2.0を有効にする方法」でググってください。</p>
-		</div>
-    <div id="buttons">
-      <a id="about" href="https://hihaheho.com/hug"></a>
-      <a id="random"></a>
-      <a id="room"></a>
-      <a id="share"></a>
-      <a id="help"></a>
-      <input id="name" type="text" placeholder="Name" />
-      <p id="message"></p>
-      <p id="alert"></p>
-    </div>
-    <div id="helpen" onclick="toggleHelpEn()" style="display: none;">
-      <img src="/helpen.png" />
-    </div>
-    <div id="helpja" onclick="toggleHelpJa()" style="display: none;">
-      <img src="/helpja.png" />
-    </div>
-  </body>
+  <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512x512.png">
+  <link rel="manifest" href="/manifest.webmanifest">
 
-  <script type="module">
-    import init, {
-      on_output, on_name_change, on_click_random, on_click_room, on_click_share,
-    } from './hug.js'
-    import { Socket } from "./phoenix.esm.js"
-
-    let socket;
-    let params = new URLSearchParams(window.location.search);
-    if (params.get("local")) {
-      socket = new Socket("ws://localhost:4000/socket", {params: {}})
-    } else {
-      socket = new Socket("wss://hug-server.onrender.com/socket", {params: {}})
-    }
-    socket.connect()
-    let channel = socket.channel("player", {})
-    channel.join()
-      .receive("ok", resp => { console.log("Joined successfully", resp) })
-      .receive("error", resp => { console.log("Unable to join", resp) })
-
-    // register event handlers for input/output.
-    document.push = payload => channel.push("input", JSON.parse(payload));
-    channel.on("output", payload => {
-      on_output(JSON.stringify(payload))
-    });
-
-    // join room by key
-    if (params.get("key")) {
-      window.localStorage.setItem("key", params.get("key"));
-    } else {
-      window.localStorage.removeItem("key");
+  <style>
+    @font-face {
+      font-family: 'DotGothic';
+      src: url('/assets/DotGothic16-Regular.ttf');
     }
 
-    let name = window.localStorage.getItem("name");
+    html,
+    body {
+      padding: 0px;
+      margin: 0px;
+      touch-action: none;
+    }
+
+    body {
+      z-index: 1;
+      font-family: 'DotGothic', sans-serif;
+    }
+
+    canvas {
+      position: absolute;
+      width: 100% !important;
+      height: 100% !important;
+      z-index: 2;
+    }
+
+    #helpja,
+    #helpen {
+      position: absolute;
+      z-index: 5;
+      width: 100%;
+      height: 100%;
+      background-color: #333;
+    }
+
+    img {
+      height: 100%;
+      width: 100%;
+      object-fit: contain;
+      opacity: 1.0;
+    }
+
+    #buttons {
+      position: absolute;
+      z-index: 3;
+      width: 100%;
+    }
+
+    #message,
+    #alert {
+      font-size: 2.7em;
+    }
+
+    #name {
+      font-size: 2.7em;
+      float: right;
+      max-width: 30%;
+      height: 128px;
+      font-size: 50px;
+      font-family: 'DotGothic', sans-serif;
+    }
+
+    #about {
+      display: inline-block;
+      width: 128px;
+      height: 128px;
+      image-rendering: pixelated;
+      background-image: url('/logo.png');
+      background-size: contain;
+    }
+
+    #random {
+      display: inline-block;
+      width: 128px;
+      width: 128px;
+      height: 128px;
+      image-rendering: pixelated;
+      background-image: url('/random.png');
+      background-size: contain;
+    }
+
+    #room {
+      display: inline-block;
+      width: 128px;
+      width: 128px;
+      height: 128px;
+      image-rendering: pixelated;
+      background-image: url('/friend.png');
+      background-size: contain;
+    }
+
+    #share {
+      display: inline-block;
+      width: 128px;
+      width: 128px;
+      height: 128px;
+      image-rendering: pixelated;
+      background-image: url('/share.png');
+      background-size: contain;
+    }
+
+    #help {
+      display: inline-block;
+      width: 128px;
+      width: 128px;
+      height: 128px;
+      image-rendering: pixelated;
+      background-image: url('/help.png');
+      background-size: contain;
+    }
+
+  </style>
+</head>
+<script>
+  function toggleHelpEn() {
+    let help = document.querySelector('#helpen');
+    help.style.display = help.style.display == 'none' ? 'flex' : 'none';
+  }
+  function toggleHelpJa() {
+    let help = document.querySelector('#helpja');
+    help.style.display = help.style.display == 'none' ? 'flex' : 'none';
+  }
+</script>
+
+<body>
+  <div id="iphone">
+    <p>If you're using Safari on iPhone, please google how to enable WebGL2.0 on iPhone.</p>
+    <p>iPhoneのSafariをお使いの方は、「iPhoneでWebGL2.0を有効にする方法」でググってください。</p>
+  </div>
+  <div id="buttons">
+    <a id="about" href="https://hihaheho.com/hug"></a>
+    <a id="random"></a>
+    <a id="room"></a>
+    <a id="share"></a>
+    <a id="help"></a>
+    <input id="name" type="text" placeholder="Name" />
+    <p id="message"></p>
+    <p id="alert"></p>
+  </div>
+  <div id="helpen" onclick="toggleHelpEn()" style="display: none;">
+    <img src="/helpen.png" />
+  </div>
+  <div id="helpja" onclick="toggleHelpJa()" style="display: none;">
+    <img src="/helpja.png" />
+  </div>
+</body>
+
+<script type="module">
+  import init, {
+    on_output, on_name_change, on_click_random, on_click_room, on_click_share,
+  } from './hug.js'
+  import { Socket } from "./phoenix.esm.js"
+
+  let socket;
+  let params = new URLSearchParams(window.location.search);
+  if (params.get("local")) {
+    socket = new Socket("ws://localhost:4000/socket", { params: {} })
+  } else {
+    socket = new Socket("wss://hugserver.herokuapp.com/socket", { params: {} })
+  }
+  socket.connect()
+  let channel = socket.channel("player", {})
+  channel.join()
+    .receive("ok", resp => { console.log("Joined successfully", resp) })
+    .receive("error", resp => { console.log("Unable to join", resp) })
+
+  // register event handlers for input/output.
+  document.push = payload => channel.push("input", JSON.parse(payload));
+  channel.on("output", payload => {
+    on_output(JSON.stringify(payload))
+  });
+
+  // join room by key
+  if (params.get("key")) {
+    window.localStorage.setItem("key", params.get("key"));
+  } else {
+    window.localStorage.removeItem("key");
+  }
+
+  let name = window.localStorage.getItem("name");
+  if (name) {
+    document.querySelector("#name").value = name;
+  }
+
+  document.on_load = () => {
     if (name) {
-      document.querySelector("#name").value = name;
+      on_name_change(name)
     }
-
-    document.on_load = () => {
-      if (name) {
-        on_name_change(name)
-      }
-      document.querySelector("#random").onclick = () => on_click_random();
-      document.querySelector("#room").onclick = () => on_click_room();
-      document.querySelector("#share").onclick = () => on_click_share();
-      document.querySelector("#name").oninput = (event) => {
-        window.localStorage.setItem("name", event.target.value);
-        on_name_change(event.target.value);
-      }
+    document.querySelector("#random").onclick = () => on_click_random();
+    document.querySelector("#room").onclick = () => on_click_room();
+    document.querySelector("#share").onclick = () => on_click_share();
+    document.querySelector("#name").oninput = (event) => {
+      window.localStorage.setItem("name", event.target.value);
+      on_name_change(event.target.value);
     }
+  }
 
-    // https://stackoverflow.com/questions/7995752/detect-desktop-browser-not-mobile-with-javascript#comment106045591_16156769
-    document.is_mobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    document.is_iphone = navigator.platform == 'iPhone' || (navigator.userAgent.indexOf('Mac') != -1 && window.is_mobile);
+  // https://stackoverflow.com/questions/7995752/detect-desktop-browser-not-mobile-with-javascript#comment106045591_16156769
+  document.is_mobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  document.is_iphone = navigator.platform == 'iPhone' || (navigator.userAgent.indexOf('Mac') != -1 && window.is_mobile);
 
-    document.querySelector("#name").focus
+  document.querySelector("#name").focus
 
-    // If key pressed and not focused on the name input, then focus the canvas.
-    let name_focus = false;
-    let name_input = document.querySelector("#name");
-    name_input.addEventListener("blur", () => {name_focus = false});
-    name_input.addEventListener("focus", () => {name_focus = true});
-    window.onkeypress = (event) => {
-      console.log(event);
-      let canvas = document.querySelector("canvas");
-      if (canvas && !name_focus) {
-        canvas.focus()
-      }
-    };
-
-    if (localStorage.getItem("first") != "false") {
-      localStorage.setItem("first", "false");
-      if (navigator.language.startsWith("ja")) {
-        toggleHelpJa();
-      } else {
-        toggleHelpEn();
-      }
+  // If key pressed and not focused on the name input, then focus the canvas.
+  let name_focus = false;
+  let name_input = document.querySelector("#name");
+  name_input.addEventListener("blur", () => { name_focus = false });
+  name_input.addEventListener("focus", () => { name_focus = true });
+  window.onkeypress = (event) => {
+    console.log(event);
+    let canvas = document.querySelector("canvas");
+    if (canvas && !name_focus) {
+      canvas.focus()
     }
+  };
 
-    document.querySelector("#help").onclick = () => {
-      if (navigator.language.startsWith("ja")) {
-        toggleHelpJa();
-      } else {
-        toggleHelpEn();
-      }
+  if (localStorage.getItem("first") != "false") {
+    localStorage.setItem("first", "false");
+    if (navigator.language.startsWith("ja")) {
+      toggleHelpJa();
+    } else {
+      toggleHelpEn();
     }
+  }
 
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then(registration => {
-            console.log(`Service Worker registered! Scope: ${registration.scope}`);
-          })
-          .catch(err => {
-            console.log(`Service Worker registration failed: ${err}`);
-          });
-      });
+  document.querySelector("#help").onclick = () => {
+    if (navigator.language.startsWith("ja")) {
+      toggleHelpJa();
+    } else {
+      toggleHelpEn();
     }
+  }
 
-    init()
-  </script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(registration => {
+          console.log(`Service Worker registered! Scope: ${registration.scope}`);
+        })
+        .catch(err => {
+          console.log(`Service Worker registration failed: ${err}`);
+        });
+    });
+  }
+
+  init()
+</script>
+
 </html>
