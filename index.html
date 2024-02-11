@@ -169,26 +169,36 @@
   import init, {
     on_output, on_name_change, on_click_random, on_click_room, on_click_share,
   } from './hug.js'
-  import { Socket } from "./phoenix.esm.js"
 
+  let socketUrl
   let socket;
   let params = new URLSearchParams(window.location.search);
   if (params.get("local")) {
-    socket = new Socket("ws://localhost:4000/socket", { params: {} })
+    socketUrl = "ws://localhost:8000/websocket"
   } else {
-    socket = new Socket("wss://hug-server.shuttleapp.rs/socket", { params: {} })
+    socketUrl = "wss://hug-server.shuttleapp.rs/websocket"
   }
-  socket.connect()
-  let channel = socket.channel("player", {})
-  channel.join()
-    .receive("ok", resp => { console.log("Joined successfully", resp) })
-    .receive("error", resp => { console.log("Unable to join", resp) })
+  socket = new WebSocket(socketUrl);
+  let backoff = 1000;
+  socket.onclose = () => {
+    setTimeout(() => {
+      socket = new WebSocket(socketUrl);
+      backoff *= 2;
+    }, backoff);
+  }
+  socket.onopen = () => {
+    backoff = 1000;
+    console.log('WebSocket Open');
+  }
+  socket.onerror = (error) => {
+    console.log('WebSocket Error ' + error);
+  }
+  socket.onmessage = (event) => {
+    on_output(event.data)
+  }
 
   // register event handlers for input/output.
-  document.push = payload => channel.push("input", JSON.parse(payload));
-  channel.on("output", payload => {
-    on_output(JSON.stringify(payload))
-  });
+  document.push = payload => socket.send(payload);
 
   // join room by key
   if (params.get("key")) {
