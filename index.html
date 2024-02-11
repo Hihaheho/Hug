@@ -178,27 +178,29 @@
   } else {
     socketUrl = "wss://hug-server.shuttleapp.rs/websocket"
   }
-  socket = new WebSocket(socketUrl);
   let backoff = 1000;
-  socket.onclose = () => {
-    setTimeout(() => {
-      socket = new WebSocket(socketUrl);
-      backoff *= 2;
-    }, backoff);
-  }
-  socket.onopen = () => {
-    backoff = 1000;
-    console.log('WebSocket Open');
-  }
-  socket.onerror = (error) => {
-    console.log('WebSocket Error ' + error);
-  }
-  socket.onmessage = (event) => {
-    on_output(event.data)
-  }
-
-  // register event handlers for input/output.
-  document.push = payload => socket.send(payload);
+  let connect = socketUrl => {
+    socket = new WebSocket(socketUrl);
+    socket.onopen = () => {
+      backoff = 1000;
+      // register event handlers for input/output.
+      document.push = payload => socket.send(payload);
+      console.log('WebSocket Open');
+    }
+    socket.onmessage = (event) => {
+      on_output(event.data)
+    }
+    socket.onerror = (error) => {
+      console.log('WebSocket Error ' + error);
+    }
+    socket.onclose = () => {
+      setTimeout(() => {
+        connect(socketUrl);
+        backoff *= 2;
+      }, backoff);
+    }
+  };
+  connect(socketUrl);
 
   // join room by key
   if (params.get("key")) {
