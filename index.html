@@ -176,7 +176,7 @@
   if (params.get("local")) {
     socket = new Socket("ws://localhost:4000/socket", { params: {} })
   } else {
-    socket = new Socket("wss://hug-server.shuttleapp.rs", { params: {} })
+    socket = new Socket("wss://hug-server.shuttleapp.rs/socket", { params: {} })
   }
   socket.connect()
   let channel = socket.channel("player", {})
