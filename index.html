@@ -194,6 +194,8 @@
       console.log('WebSocket Error ' + error);
     }
     socket.onclose = () => {
+      document.push = () => {};
+      console.log(`WebSocket Closed. Reconnect in ${backoff}ms`);
       setTimeout(() => {
         connect(socketUrl);
         backoff *= 2;
