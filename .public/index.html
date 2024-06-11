@@ -171,12 +171,12 @@
   } from './hug.js'
   import { Socket } from "./phoenix.esm.js"
 
+  let params = new URLSearchParams(window.location.search);
   var socket;
   let reconnect = () => {
     if (socket) {
       socket.disconnect();
     }
-    let params = new URLSearchParams(window.location.search);
     if (params.get("local")) {
       socket = new Socket("ws://localhost:4000/socket", { params: {} })
     } else {
