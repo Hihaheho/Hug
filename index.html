@@ -169,40 +169,25 @@
   import init, {
     on_output, on_name_change, on_click_random, on_click_room, on_click_share,
   } from './hug.js'
+  import { Socket } from "./phoenix.esm.js"
 
-  let socketUrl
   let socket;
   let params = new URLSearchParams(window.location.search);
   if (params.get("local")) {
-    socketUrl = "ws://localhost:8000/websocket"
+    socket = new Socket("ws://localhost:4000/socket", { params: {} })
   } else {
-    socketUrl = "wss://hug-server.shuttleapp.rs/websocket"
+    socket = new Socket("wss://hug-server.ryo12redstone.workers.de", { params: {} })
   }
-  let backoff = 1000;
-  let connect = socketUrl => {
-    socket = new WebSocket(socketUrl);
-    socket.onopen = () => {
-      backoff = 1000;
-      // register event handlers for input/output.
-      document.push = payload => socket.send(payload);
-      console.log('WebSocket Open');
-    }
-    socket.onmessage = (event) => {
-      on_output(event.data)
-    }
-    socket.onerror = (error) => {
-      console.log('WebSocket Error ' + error);
-    }
-    socket.onclose = () => {
-      document.push = () => {};
-      console.log(`WebSocket Closed. Reconnect in ${backoff}ms`);
-      setTimeout(() => {
-        connect(socketUrl);
-        backoff *= 2;
-      }, backoff);
-    }
-  };
-  connect(socketUrl);
+  let channel = socket.channel("player", {})
+  channel.join()
+    .receive("ok", resp => { console.log("Joined successfully", resp) })
+    .receive("error", resp => { console.log("Unable to join", resp) })
+
+  // register event handlers for input/output.
+  document.push = payload => channel.push("input", JSON.parse(payload));
+  channel.on("output", payload => {
+    on_output(JSON.stringify(payload))
+  });
 
   // join room by key
   if (params.get("key")) {
@@ -220,8 +205,16 @@
     if (name) {
       on_name_change(name)
     }
-    document.querySelector("#random").onclick = () => on_click_random();
-    document.querySelector("#room").onclick = () => on_click_room();
+    document.querySelector("#random").onclick = () => {
+      socket.disconnect();
+      socket.connect();
+      on_click_random();
+    };
+    document.querySelector("#room").onclick = () => {
+      socket.disconnect();
+      socket.connect();
+      on_click_room();
+    };
     document.querySelector("#share").onclick = () => on_click_share();
     document.querySelector("#name").oninput = (event) => {
       window.localStorage.setItem("name", event.target.value);
