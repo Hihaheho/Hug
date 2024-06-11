@@ -171,23 +171,29 @@
   } from './hug.js'
   import { Socket } from "./phoenix.esm.js"
 
-  let socket;
-  let params = new URLSearchParams(window.location.search);
-  if (params.get("local")) {
-    socket = new Socket("ws://localhost:4000/socket", { params: {} })
-  } else {
-    socket = new Socket("wss://hug-server.ryo12redstone.workers.dev", { params: {} })
+  var socket;
+  let reconnect = () => {
+    if (socket) {
+      socket.disconnect();
+    }
+    let params = new URLSearchParams(window.location.search);
+    if (params.get("local")) {
+      socket = new Socket("ws://localhost:4000/socket", { params: {} })
+    } else {
+      socket = new Socket("wss://hug-server.ryo12redstone.workers.dev", { params: {} })
+    }
+    socket.connect();
+    let channel = socket.channel("player", {})
+    channel.join()
+      .receive("ok", resp => { console.log("Joined successfully", resp) })
+      .receive("error", resp => { console.log("Unable to join", resp) })
+  
+    // register event handlers for input/output.
+    document.push = payload => channel.push("input", JSON.parse(payload));
+    channel.on("output", payload => {
+      on_output(JSON.stringify(payload))
+    });
   }
-  let channel = socket.channel("player", {})
-  channel.join()
-    .receive("ok", resp => { console.log("Joined successfully", resp) })
-    .receive("error", resp => { console.log("Unable to join", resp) })
-
-  // register event handlers for input/output.
-  document.push = payload => channel.push("input", JSON.parse(payload));
-  channel.on("output", payload => {
-    on_output(JSON.stringify(payload))
-  });
 
   // join room by key
   if (params.get("key")) {
@@ -206,13 +212,11 @@
       on_name_change(name)
     }
     document.querySelector("#random").onclick = () => {
-      socket.disconnect();
-      socket.connect();
+      reconnect();
       on_click_random();
     };
     document.querySelector("#room").onclick = () => {
-      socket.disconnect();
-      socket.connect();
+      reconnect();
       on_click_room();
     };
     document.querySelector("#share").onclick = () => on_click_share();
