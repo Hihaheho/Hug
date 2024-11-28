@@ -156,6 +156,9 @@
     <input id="name" type="text" placeholder="Name" />
     <p id="message"></p>
     <p id="alert"></p>
+    <p id="network-alert" hidden>
+      Server might be down. Feel free to contact developer on email, X, or Discord.
+    </p>
   </div>
   <div id="helpen" onclick="toggleHelpEn()" style="display: none;">
     <img src="/helpen.png" />
@@ -173,6 +176,7 @@
 
   let params = new URLSearchParams(window.location.search);
   var socket;
+  let network_alert = document.querySelector("#network-alert");
   let reconnect = () => {
     if (socket) {
       socket.disconnect();
@@ -182,12 +186,18 @@
     } else {
       socket = new Socket("wss://hug-server.onrender.com/socket", { params: {} })
     }
+    socket.onError(() => {
+      network_alert.hidden = false;
+    });
+    socket.onOpen(() => {
+      network_alert.hidden = true;
+    });
     socket.connect();
     let channel = socket.channel("player", {})
     channel.join()
       .receive("ok", resp => { console.log("Joined successfully", resp) })
       .receive("error", resp => { console.log("Unable to join", resp) })
-  
+
     // register event handlers for input/output.
     document.push = payload => channel.push("input", JSON.parse(payload));
     channel.on("output", payload => {

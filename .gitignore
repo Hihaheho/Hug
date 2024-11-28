@@ -8,5 +8,6 @@
 !Cargo.toml
 !rust-toolchain.toml
 !.cargo/config.toml
+!README.md
 
 target/
