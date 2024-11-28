@@ -180,7 +180,7 @@
     if (params.get("local")) {
       socket = new Socket("ws://localhost:4000/socket", { params: {} })
     } else {
-      socket = new Socket("wss://hug-server.ryo12redstone.workers.dev", { params: {} })
+      socket = new Socket("wss://hug-server.onrender.com", { params: {} })
     }
     socket.connect();
     let channel = socket.channel("player", {})
