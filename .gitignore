@@ -6,3 +6,7 @@
 !.gitignore
 !Cargo.lock
 !Cargo.toml
+!rust-toolchain.toml
+!.cargo/config.toml
+
+target/
