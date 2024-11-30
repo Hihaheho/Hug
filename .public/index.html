@@ -208,6 +208,8 @@
   // join room by key
   if (params.get("key")) {
     window.localStorage.setItem("key", params.get("key"));
+    // ensure the socket is prepared when the room key is provided.
+    reconnect();
   } else {
     window.localStorage.removeItem("key");
   }
