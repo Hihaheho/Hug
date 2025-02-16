@@ -1,7 +1,7 @@
 {
     "theme_color": "#305040",
     "background_color": "#ffccd3",
-    "display": "standalone",
+    "display": "fullscreen",
     "scope": "/",
     "start_url": "/",
     "name": "The Hug Game",
